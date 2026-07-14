@@ -1,5 +1,34 @@
 # Bitfinex 放貸市場決策輔助系統進度紀錄
 
+## 2026-07-14 本次交接狀態
+
+目前程式、文件與版本控制狀態：
+
+- Git 已初始化，主分支為 `master`，首次 commit 為 `af956c6` (`chore: initialize Bitfinex lending project`)。
+- 最後完整單元測試：`55 passed, 1 deselected`。
+- 資料收集、SQLite 儲存、快照 CSV、特徵工程與 `modeling_features.csv` 均已實作。
+
+目前資料狀態：
+
+- 成功原始快照共 103 列：`fUSD=50`、`fBTC=27`、`fETH=26`。
+- 每個市場目前只有 1 個成功觀測時點。
+- `modeling_features` 共 3 列，每個市場 1 列。
+- 因歷史觀測不足，`previous_weighted_avg_rate`、`rate_change`、`amount_change` 與 `target_next_weighted_avg_rate` 目前皆無非空值。
+
+本次最後執行紀錄：
+
+- run ID `620e03e7-6fd1-4afd-911b-63a3ad6cc50b` 嘗試收集三個市場。
+- 因當前執行沙箱拒絕對外網路連線，三個市場皆記錄為 `failed`；這是執行環境限制，不是 Bitfinex 資料格式或程式解析錯誤。
+- 失敗執行沒有新增 snapshot，現有 103 列成功資料仍完整。
+- `crawl_logs` 目前為 3 筆 success 與 3 筆 failed；`error_logs` 為 3 筆。
+
+下次續作起點：
+
+1. 在允許對外網路的環境重新執行 `python -m bitfinex_lending`。
+2. 收集成功後執行 `python -m bitfinex_lending.features`。
+3. 持續累積多個觀測時點，並確認 lag、change 與 target 非空資料量。
+4. 資料量足夠後，再開始 `baseline_mean` 與 `baseline_previous` 的設計與實作。
+
 ## 2026-07-14 特徵工程管線
 
 已完成從 SQLite 快照資料批次重建建模特徵、以單一交易更新 `modeling_features`，並原子輸出 `data/csv/modeling_features.csv`。空資料會成功產生只含標頭的 CSV，錯誤會由命令邊界以非零狀態回報。

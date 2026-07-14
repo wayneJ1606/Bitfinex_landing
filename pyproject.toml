@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bitfinex-lending"
+version = "0.1.0"
+description = "One-shot Bitfinex funding book collector"
+requires-python = ">=3.11"
+dependencies = ["requests>=2.32,<3"]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<9"]
+
+[tool.setuptools.packages.find]
+include = ["bitfinex_lending*"]
+
+[tool.pytest.ini_options]
+addopts = "-m 'not integration'"
+markers = ["integration: tests that access the live Bitfinex API"]
+testpaths = ["tests"]
+

@@ -166,6 +166,7 @@ git commit -m "feat: load repository funding CSVs"
 ### Task 2: Thresholded Baselines and Linear Regression
 
 **Files:**
+- Modify: `pyproject.toml`
 - Modify: `bitfinex_lending/models.py`
 - Create: `bitfinex_lending/model_training.py`
 - Create: `tests/test_model_training.py`
@@ -174,7 +175,21 @@ git commit -m "feat: load repository funding CSVs"
 - Consumes: `Sequence[ModelingFeature]`, timezone-aware `run_at`, and `required_rows` defaulting to `168`.
 - Produces: `ModelStatus`, `ModelEvaluation`, `ModelPrediction`, `ModelingResult`, `ModelTrainingError`, `PREDICTOR_FIELDS`, and `evaluate_models(features, run_at, required_rows=168) -> ModelingResult`.
 
-- [ ] **Step 1: Add failing 167/168 threshold and market-isolation tests**
+- [ ] **Step 1: Add and install the modeling dependency**
+
+In `pyproject.toml`, add the separately installable optional group without changing collector dependencies:
+
+```toml
+[project.optional-dependencies]
+test = ["pytest>=8,<9"]
+modeling = ["scikit-learn>=1.9,<2"]
+```
+
+Run: `python -m pip install -e ".[test,modeling]"`
+
+Expected: installation succeeds and `python -c "import sklearn; print(sklearn.__version__)"` reports a version in `[1.9, 2)`.
+
+- [ ] **Step 2: Add failing 167/168 threshold and market-isolation tests**
 
 Create 168 chronological eligible `ModelingFeature` rows with a deterministic target. Assert:
 
@@ -197,13 +212,13 @@ assert insufficient.predictions == ()
 
 Combine 168 eligible `fUSD` rows and 10 `fBTC` rows; assert USD trains while BTC remains insufficient.
 
-- [ ] **Step 2: Run RED verification**
+- [ ] **Step 3: Run RED verification**
 
 Run: `python -m pytest tests/test_model_training.py -v`
 
 Expected: imports fail because modeling result records and `model_training` do not exist.
 
-- [ ] **Step 3: Add result records and eligibility boundary**
+- [ ] **Step 4: Add result records and eligibility boundary**
 
 Append frozen dataclasses to `models.py`:
 
@@ -251,7 +266,7 @@ class ModelingResult:
 
 In `model_training.py`, define the exact `PREDICTOR_FIELDS` from the spec, group by market, order by parsed UTC `feature_time`, remove any row with null predictor/target, and return insufficient statuses before importing/training estimators.
 
-- [ ] **Step 4: Add failing leakage-safe model and metric tests**
+- [ ] **Step 5: Add failing leakage-safe model and metric tests**
 
 Assert:
 
@@ -263,13 +278,13 @@ Assert:
 - evaluation MAE/RMSE/R² match independently calculated expected values.
 - naive or invalid `run_at`, non-finite predictors/targets, and non-finite R² raise `ModelTrainingError`.
 
-- [ ] **Step 5: Implement the models and common evaluation path**
+- [ ] **Step 6: Implement the models and common evaluation path**
 
 Implement one `_evaluate_predictions` helper using `mean_absolute_error`, `mean_squared_error`, and `r2_score`; calculate RMSE with `math.sqrt(mean_squared_error(...))`. Fit `LinearRegression` only on the chronological training matrix. Convert NumPy/scikit values to built-in `float` and reject non-finite metrics.
 
 Use the same ordered validation feature list for all prediction records. Sort statuses by market and outputs by `(market, model_name, feature_time)`.
 
-- [ ] **Step 6: Run GREEN and full model tests**
+- [ ] **Step 7: Run GREEN and full model tests**
 
 Run: `python -m pytest tests/test_model_training.py -v`
 
@@ -279,10 +294,10 @@ Run: `python -m pytest tests/test_feature_calculation.py tests/test_model_traini
 
 Expected: existing feature behavior and new training behavior both pass.
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
-git add bitfinex_lending/models.py bitfinex_lending/model_training.py tests/test_model_training.py
+git add pyproject.toml bitfinex_lending/models.py bitfinex_lending/model_training.py tests/test_model_training.py
 git commit -m "feat: evaluate baseline and linear models"
 ```
 
@@ -392,14 +407,13 @@ git commit -m "feat: add modeling dataset command"
 ### Task 4: Dependencies and Daily GitHub Workflow
 
 **Files:**
-- Modify: `pyproject.toml`
 - Modify: `.github/workflows/collect-funding-books.yml`
 - Create: `.github/workflows/build-modeling-dataset.yml`
 - Create: `tests/test_modeling_workflow.py`
 
 **Interfaces:**
 - Consumes: `python -m bitfinex_lending.modeling` from Task 3.
-- Produces: `modeling` optional dependency and a write-capable daily/manual workflow serialized with collection.
+- Produces: a write-capable daily/manual workflow serialized with collection and using the `modeling` optional dependency delivered by Task 2.
 
 - [ ] **Step 1: Write failing dependency and workflow contract tests**
 
@@ -408,9 +422,6 @@ Create `tests/test_modeling_workflow.py` and assert:
 ```python
 workflow = Path(".github/workflows/build-modeling-dataset.yml").read_text(encoding="utf-8")
 collector = Path(".github/workflows/collect-funding-books.yml").read_text(encoding="utf-8")
-project = Path("pyproject.toml").read_text(encoding="utf-8")
-
-assert 'modeling = ["scikit-learn>=1.9,<2"]' in project
 assert 'cron: "37 18 * * *"' in workflow
 assert "workflow_dispatch:" in workflow
 assert "contents: write" in workflow
@@ -432,25 +443,9 @@ assert "--force" not in workflow
 
 Run: `python -m pytest tests/test_modeling_workflow.py -v`
 
-Expected: missing workflow and dependency assertions fail.
+Expected: missing workflow and shared-concurrency assertions fail.
 
-- [ ] **Step 3: Add optional modeling dependency**
-
-In `pyproject.toml` use:
-
-```toml
-[project.optional-dependencies]
-test = ["pytest>=8,<9"]
-modeling = ["scikit-learn>=1.9,<2"]
-```
-
-Install for development and verification:
-
-```powershell
-python -m pip install -e ".[test,modeling]"
-```
-
-- [ ] **Step 4: Share concurrency and create workflow**
+- [ ] **Step 3: Share concurrency and create workflow**
 
 Change the collector group to `bitfinex-repository-writer`. Create `.github/workflows/build-modeling-dataset.yml` mirroring the reviewed collector patterns with:
 
@@ -469,7 +464,7 @@ concurrency:
 
 Use `ubuntu-latest`, timeout 10 minutes, `actions/checkout@v6` with full history, `actions/setup-python@v6`, install `.[test,modeling]`, run `python -m pytest -q`, then `python -m bitfinex_lending.modeling`. Configure the Actions bot identity, stage only `data/modeling`, skip empty commits, commit `data: rebuild modeling dataset at <UTC> [skip ci]`, and retry one rejected push with pull/rebase. Do not use `continue-on-error` for tests or modeling.
 
-- [ ] **Step 5: Run workflow GREEN and full suite**
+- [ ] **Step 4: Run workflow GREEN and full suite**
 
 Run: `python -m pytest tests/test_workflow.py tests/test_modeling_workflow.py -v`
 
@@ -479,10 +474,10 @@ Run: `python -m pytest -q`
 
 Expected: all offline tests pass; the live integration test remains deselected.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add pyproject.toml .github/workflows/collect-funding-books.yml .github/workflows/build-modeling-dataset.yml tests/test_modeling_workflow.py
+git add .github/workflows/collect-funding-books.yml .github/workflows/build-modeling-dataset.yml tests/test_modeling_workflow.py
 git commit -m "ci: build modeling dataset daily"
 ```
 

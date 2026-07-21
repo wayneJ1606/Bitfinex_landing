@@ -7,6 +7,7 @@ __pycache__/
 # Virtual environments
 .venv/
 venv/
+.worktrees/
 
 # Packaging and coverage artifacts
 *.egg-info/
@@ -26,4 +27,3 @@ data/csv/*.tmp
 .idea/
 .DS_Store
 Thumbs.db
-

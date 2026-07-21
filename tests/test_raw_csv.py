@@ -84,6 +84,39 @@ def test_missing_raw_root_returns_empty_tuple(tmp_path: Path) -> None:
     assert load_raw_snapshots(tmp_path / "missing") == ()
 
 
+def test_existing_raw_root_must_be_a_directory(tmp_path: Path) -> None:
+    root = tmp_path / "raw"
+    root.write_text("not a directory", encoding="utf-8")
+
+    with pytest.raises(RawCsvError, match="raw root must be a directory"):
+        load_raw_snapshots(root)
+
+
+@pytest.mark.parametrize(
+    "relative_path",
+    [
+        "fUSD.csv",
+        "archive/fUSD.csv",
+        "26/07/21/fUSD.csv",
+        "2026/7/21/fUSD.csv",
+        "2026/07/1/fUSD.csv",
+        "2026/13/21/fUSD.csv",
+        "2026/02/30/fUSD.csv",
+        "archive/2026/07/21/fUSD.csv",
+    ],
+)
+def test_rejects_csv_outside_strict_daily_market_path(
+    tmp_path: Path, relative_path: str
+) -> None:
+    root = tmp_path / "raw"
+    write_raw(root / relative_path, [raw_row()])
+
+    with pytest.raises(
+        RawCsvError, match=r"path must match YYYY/MM/DD/<supported-market>\.csv"
+    ):
+        load_raw_snapshots(root)
+
+
 @pytest.mark.parametrize(
     ("reason", "header", "values", "filename"),
     [

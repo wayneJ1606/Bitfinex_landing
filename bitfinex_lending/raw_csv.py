@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import csv
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 import math
 from pathlib import Path
 from typing import Iterator
@@ -30,11 +30,14 @@ def load_raw_snapshots(root: Path) -> tuple[FundingBookRow, ...]:
     root = Path(root)
     if not root.exists():
         return ()
+    if not root.is_dir():
+        raise RawCsvError("invalid raw CSV root: raw root must be a directory")
 
     parsed: list[tuple[datetime, FundingBookRow]] = []
     seen_rows: set[tuple[object, ...]] = set()
     run_times: dict[tuple[str, str], str] = {}
     for path in sorted(root.rglob("*.csv"), key=lambda item: item.as_posix()):
+        _validate_raw_path(path, root)
         for line_number, values in _read_rows(path, root):
             row, timestamp = _parse_row(values, path, root, line_number)
             run_key = (row.run_id, row.market)
@@ -69,6 +72,35 @@ def load_raw_snapshots(root: Path) -> tuple[FundingBookRow, ...]:
             ),
         )
     )
+
+
+def _validate_raw_path(path: Path, root: Path) -> None:
+    relative = path.relative_to(root)
+    parts = relative.parts
+    reason = "path must match YYYY/MM/DD/<supported-market>.csv"
+    if len(parts) != 4:
+        raise _csv_error(root, path, 1, reason)
+
+    year, month, day, filename = parts
+    if (
+        len(year) != 4
+        or len(month) != 2
+        or len(day) != 2
+        or not year.isdigit()
+        or not month.isdigit()
+        or not day.isdigit()
+    ):
+        raise _csv_error(root, path, 1, reason)
+    try:
+        date(int(year), int(month), int(day))
+    except ValueError as error:
+        raise _csv_error(root, path, 1, reason) from error
+
+    filename_path = Path(filename)
+    if filename_path.suffix != ".csv":
+        raise _csv_error(root, path, 1, reason)
+    if filename_path.stem not in SUPPORTED_MARKETS:
+        raise _csv_error(root, path, 1, "unsupported market in path")
 
 
 def _csv_error(

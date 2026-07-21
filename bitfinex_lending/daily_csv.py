@@ -9,12 +9,17 @@ from .csv_export import FIELD_NAMES, CsvExportError
 from .models import FundingBookRow
 
 
+SUPPORTED_MARKETS = frozenset({"fUSD", "fBTC", "fETH"})
+
+
 def _validate_rows(rows: Sequence[FundingBookRow]) -> FundingBookRow:
     if not rows:
         raise ValueError("daily CSV export requires at least one row")
     first = rows[0]
     if any(row.run_id != first.run_id or row.market != first.market for row in rows):
         raise ValueError("daily CSV rows must share run_id and market")
+    if first.market not in SUPPORTED_MARKETS:
+        raise ValueError("daily CSV rows must use a supported market")
     return first
 
 
@@ -46,6 +51,8 @@ def append_daily_snapshot(
 ) -> Path:
     first = _validate_rows(rows)
     observed_at = _utc_date(first.fetched_at)
+    if any(_utc_date(row.fetched_at).date() != observed_at.date() for row in rows[1:]):
+        raise ValueError("daily CSV rows must share the same UTC date")
     target = Path(output_root) / observed_at.strftime("%Y/%m/%d") / f"{first.market}.csv"
     temporary = target.with_suffix(".csv.tmp")
 
@@ -67,6 +74,9 @@ def append_daily_snapshot(
             writer.writerows(_serialize(rows))
         temporary.replace(target)
     except (OSError, csv.Error) as error:
-        temporary.unlink(missing_ok=True)
+        try:
+            temporary.unlink(missing_ok=True)
+        except OSError:
+            pass
         raise CsvExportError(f"failed to append daily CSV: {error}") from error
     return target

@@ -70,14 +70,54 @@ def test_append_daily_snapshot_rejects_empty_mixed_and_naive_rows(tmp_path: Path
         append_daily_snapshot(make_rows(fetched_at="2026-07-21T13:17:00"), tmp_path)
 
 
+@pytest.mark.parametrize("market", ["fDOGE", "../escape", "fUSD/../../escape"])
+def test_append_daily_snapshot_rejects_unsupported_and_path_like_markets(
+    tmp_path: Path, market: str
+) -> None:
+    with pytest.raises(ValueError, match="supported market"):
+        append_daily_snapshot(make_rows(market=market), tmp_path)
+
+
+def test_append_daily_snapshot_rejects_rows_from_different_utc_dates(
+    tmp_path: Path,
+) -> None:
+    mixed = list(make_rows())
+    mixed[1] = FundingBookRow(
+        **{**mixed[1].__dict__, "fetched_at": "2026-07-22T01:00:00+00:00"}
+    )
+
+    with pytest.raises(ValueError, match="same UTC date"):
+        append_daily_snapshot(tuple(mixed), tmp_path)
+
+
 def test_append_daily_snapshot_removes_temporary_file_on_replace_failure(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    path = append_daily_snapshot(make_rows("existing-run"), tmp_path)
+    original = path.read_bytes()
+
     def fail_replace(self: Path, target: Path) -> Path:
         raise OSError("disk unavailable")
 
     monkeypatch.setattr(Path, "replace", fail_replace)
 
     with pytest.raises(CsvExportError, match="failed to append daily CSV"):
-        append_daily_snapshot(make_rows(), tmp_path)
+        append_daily_snapshot(make_rows("new-run"), tmp_path)
+    assert path.read_bytes() == original
     assert list(tmp_path.rglob("*.tmp")) == []
+
+
+def test_append_daily_snapshot_cleanup_failure_does_not_mask_export_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fail_replace(self: Path, target: Path) -> Path:
+        raise OSError("replace failed")
+
+    def fail_unlink(self: Path, missing_ok: bool = False) -> None:
+        raise OSError("cleanup failed")
+
+    monkeypatch.setattr(Path, "replace", fail_replace)
+    monkeypatch.setattr(Path, "unlink", fail_unlink)
+
+    with pytest.raises(CsvExportError, match="replace failed"):
+        append_daily_snapshot(make_rows(), tmp_path)

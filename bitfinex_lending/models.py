@@ -59,3 +59,47 @@ class RunSummary:
     @property
     def warning_count(self) -> int:
         return sum(result.status == "empty" for result in self.results)
+
+
+@dataclass(frozen=True)
+class ModelStatus:
+    market: str
+    status: Literal["insufficient_data", "trained"]
+    feature_rows: int
+    valid_rows: int
+    required_rows: int
+    message: str
+
+
+@dataclass(frozen=True)
+class ModelEvaluation:
+    run_at: str
+    market: str
+    model_name: str
+    train_rows: int
+    valid_rows: int
+    train_start: str
+    train_end: str
+    valid_start: str
+    valid_end: str
+    mae: float
+    rmse: float
+    r2: float
+
+
+@dataclass(frozen=True)
+class ModelPrediction:
+    run_at: str
+    market: str
+    feature_time: str
+    model_name: str
+    predicted_rate: float
+    actual_next_rate: float
+    prediction_error: float
+
+
+@dataclass(frozen=True)
+class ModelingResult:
+    statuses: tuple[ModelStatus, ...]
+    evaluations: tuple[ModelEvaluation, ...]
+    predictions: tuple[ModelPrediction, ...]

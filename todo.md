@@ -1,5 +1,16 @@
 # Bitfinex 放貸市場決策輔助系統待辦清單
 
+## 2026-07-21 自動特徵工程與建模
+
+- [x] 完成嚴格 Repository 原始 CSV 載入器與驗證矩陣
+- [x] 確認中斷成果保存在 `feature/automated-feature-modeling` worktree
+- [x] 執行功能分支基準測試（94 passed, 1 deselected）
+- [ ] 完成 168 筆門檻、時序切分、兩個 baseline 與線性迴歸
+- [ ] 完成 model status／evaluation／prediction 固定格式 CSV
+- [ ] 完成 `python -m bitfinex_lending.modeling` 建模命令
+- [ ] 完成每日 18:37 UTC GitHub Actions 建模 workflow
+- [ ] 執行本地 production path 與完整驗收
+
 ## 2026-07-21 GitHub Actions 自動收集
 
 - [x] 建立 UTC 每日、每市場 CSV 追加輸出

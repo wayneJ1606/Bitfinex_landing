@@ -51,7 +51,7 @@
 - Consumes: repository raw root `Path` and `FundingBookRow`.
 - Produces: `RawCsvError` and `load_raw_snapshots(root: Path) -> tuple[FundingBookRow, ...]`.
 
-- [ ] **Step 1: Write failing valid-load and deduplication tests**
+- [x] **Step 1: Write failing valid-load and deduplication tests**
 
 Create `tests/test_raw_csv.py` with a helper that writes exact-header CSV files and these assertions:
 
@@ -76,13 +76,13 @@ def test_loads_multiple_days_in_utc_order_and_deduplicates_exact_rows(tmp_path: 
 
 Also assert a missing raw root returns `()`.
 
-- [ ] **Step 2: Run RED verification**
+- [x] **Step 2: Run RED verification**
 
 Run: `python -m pytest tests/test_raw_csv.py -v`
 
 Expected: collection fails because `bitfinex_lending.raw_csv` does not exist.
 
-- [ ] **Step 3: Implement deterministic loading and parsing**
+- [x] **Step 3: Implement deterministic loading and parsing**
 
 Create `bitfinex_lending/raw_csv.py` with:
 
@@ -119,7 +119,7 @@ def load_raw_snapshots(root: Path) -> tuple[FundingBookRow, ...]:
 
 Implement concrete helpers `_csv_error(root, path, line_number, reason)`, `_read_rows(path, root)`, `_utc_timestamp(value)`, `_parse_float(value, field)`, `_parse_int(value, field)`, and `_parse_row(values, path, root, line_number)`. `_read_rows` reads the first row with `csv.reader`, verifies `tuple(header) == RAW_FIELDS` and `len(set(header)) == len(header)`, and yields `(line_number, dict(zip(RAW_FIELDS, row, strict=True)))`. Catch `UnicodeDecodeError`, `OSError`, `csv.Error`, and conversion errors and raise `RawCsvError` with `invalid raw CSV <relative-path> row <number>: <reason>`.
 
-- [ ] **Step 4: Write failing validation matrix**
+- [x] **Step 4: Write failing validation matrix**
 
 Add parameterized tests that separately assert `RawCsvError` for:
 
@@ -142,19 +142,19 @@ Add parameterized tests that separately assert `RawCsvError` for:
 
 Add focused tests for invalid UTF-8 and for one `(run_id, market)` appearing with two different normalized timestamps.
 
-- [ ] **Step 5: Complete validation and run GREEN verification**
+- [x] **Step 5: Complete validation and run GREEN verification**
 
 Run: `python -m pytest tests/test_raw_csv.py -v`
 
 Expected: all raw-loader tests pass with pristine output.
 
-- [ ] **Step 6: Run feature integration regression**
+- [x] **Step 6: Run feature integration regression**
 
 Run: `python -m pytest tests/test_raw_csv.py tests/test_feature_calculation.py -v`
 
 Expected: loader and existing feature-calculation tests pass.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add bitfinex_lending/raw_csv.py tests/test_raw_csv.py
@@ -175,7 +175,7 @@ git commit -m "feat: load repository funding CSVs"
 - Consumes: `Sequence[ModelingFeature]`, timezone-aware `run_at`, and `required_rows` defaulting to `168`.
 - Produces: `ModelStatus`, `ModelEvaluation`, `ModelPrediction`, `ModelingResult`, `ModelTrainingError`, `PREDICTOR_FIELDS`, and `evaluate_models(features, run_at, required_rows=168) -> ModelingResult`.
 
-- [ ] **Step 1: Add and install the modeling dependency**
+- [x] **Step 1: Add and install the modeling dependency**
 
 In `pyproject.toml`, add the separately installable optional group without changing collector dependencies:
 
@@ -189,7 +189,7 @@ Run: `python -m pip install -e ".[test,modeling]"`
 
 Expected: installation succeeds and `python -c "import sklearn; print(sklearn.__version__)"` reports a version in `[1.9, 2)`.
 
-- [ ] **Step 2: Add failing 167/168 threshold and market-isolation tests**
+- [x] **Step 2: Add failing 167/168 threshold and market-isolation tests**
 
 Create 168 chronological eligible `ModelingFeature` rows with a deterministic target. Assert:
 
@@ -212,13 +212,13 @@ assert insufficient.predictions == ()
 
 Combine 168 eligible `fUSD` rows and 10 `fBTC` rows; assert USD trains while BTC remains insufficient.
 
-- [ ] **Step 3: Run RED verification**
+- [x] **Step 3: Run RED verification**
 
 Run: `python -m pytest tests/test_model_training.py -v`
 
 Expected: imports fail because modeling result records and `model_training` do not exist.
 
-- [ ] **Step 4: Add result records and eligibility boundary**
+- [x] **Step 4: Add result records and eligibility boundary**
 
 Append frozen dataclasses to `models.py`:
 
@@ -266,7 +266,7 @@ class ModelingResult:
 
 In `model_training.py`, define the exact `PREDICTOR_FIELDS` from the spec, group by market, order by parsed UTC `feature_time`, remove any row with null predictor/target, and return insufficient statuses before importing/training estimators.
 
-- [ ] **Step 5: Add failing leakage-safe model and metric tests**
+- [x] **Step 5: Add failing leakage-safe model and metric tests**
 
 Assert:
 
@@ -278,13 +278,13 @@ Assert:
 - evaluation MAE/RMSE/R² match independently calculated expected values.
 - naive or invalid `run_at`, non-finite predictors/targets, and non-finite R² raise `ModelTrainingError`.
 
-- [ ] **Step 6: Implement the models and common evaluation path**
+- [x] **Step 6: Implement the models and common evaluation path**
 
 Implement one `_evaluate_predictions` helper using `mean_absolute_error`, `mean_squared_error`, and `r2_score`; calculate RMSE with `math.sqrt(mean_squared_error(...))`. Fit `LinearRegression` only on the chronological training matrix. Convert NumPy/scikit values to built-in `float` and reject non-finite metrics.
 
 Use the same ordered validation feature list for all prediction records. Sort statuses by market and outputs by `(market, model_name, feature_time)`.
 
-- [ ] **Step 7: Run GREEN and full model tests**
+- [x] **Step 7: Run GREEN and full model tests**
 
 Run: `python -m pytest tests/test_model_training.py -v`
 

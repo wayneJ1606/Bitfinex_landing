@@ -1,5 +1,18 @@
 # Bitfinex 放貸市場決策輔助系統進度紀錄
 
+## 2026-07-21 自動特徵工程與建模續作盤點
+
+目前開發已從 `master` 的設計／實作計畫，進入隔離分支
+`feature/automated-feature-modeling`。兩次中斷的成果均已提交，工作樹乾淨，沒有遺失或未提交修改。
+
+- Task 1「Repository 原始 CSV 載入器」已完成：包含遞迴掃描、嚴格欄位與路徑驗證、UTC 正規化、精確列去重及衝突檢查。
+- Task 1 實作位於 `bitfinex_lending/raw_csv.py`，測試位於 `tests/test_raw_csv.py`。
+- 功能分支基準驗證：`python -m pytest -q` 為 `94 passed, 1 deselected`。
+- Task 2–5 尚待完成：模型訓練、固定格式輸出／CLI、每日建模 workflow、文件與正式驗收。
+- Repository 目前只有每個市場 2 個 snapshot；模型需每個市場至少 168 筆有效特徵觀測，因此現階段預期輸出 `insufficient_data`，不會訓練模型。
+
+下一個實作點是 Task 2：`baseline_mean`、`baseline_previous`、`linear_regression`、時序 80/20 切分與 MAE／RMSE／R²。
+
 ## 2026-07-21 GitHub Actions 自動收集
 
 已完成每小時自動收集 workflow、依 UTC 日期分檔的每日市場 CSV 輸出、部分市場失敗時仍提交成功資料的行為、同一 run ID 去重，以及手動觸發入口。

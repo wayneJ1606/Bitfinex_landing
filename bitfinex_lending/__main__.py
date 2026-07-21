@@ -8,7 +8,7 @@ import requests
 
 from .client import BitfinexClient
 from .config import Settings
-from .csv_export import export_snapshot
+from .daily_csv import append_daily_snapshot
 from .runner import run_collection
 from .storage import Storage, StorageError
 
@@ -35,7 +35,7 @@ def main(settings: Settings | None = None) -> int:
             settings,
             client,
             storage,
-            export_snapshot,
+            append_daily_snapshot,
             uuid_factory=lambda: str(uuid4()),
             clock=lambda: datetime.now(timezone.utc),
         )

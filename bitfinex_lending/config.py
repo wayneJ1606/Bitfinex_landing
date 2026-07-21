@@ -12,5 +12,5 @@ class Settings:
     book_length: int = 25
     timeout: float = 10.0
     database_path: Path = Path("data/bitfinex_lending.sqlite3")
-    csv_directory: Path = Path("data/csv")
+    csv_directory: Path = Path("data/raw")
 

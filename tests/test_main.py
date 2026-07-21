@@ -6,6 +6,7 @@ import pytest
 
 import bitfinex_lending.__main__ as cli
 from bitfinex_lending.config import Settings
+from bitfinex_lending.daily_csv import append_daily_snapshot
 from bitfinex_lending.models import MarketResult, RunSummary
 from bitfinex_lending.storage import StorageError
 
@@ -39,8 +40,14 @@ def test_main_initializes_storage_creates_directories_and_prints_summary(
             MarketResult("fETH", "failed", 0, "request timed out"),
         ),
     )
+    captured: dict[str, object] = {}
+
+    def fake_run_collection(*args: object, **kwargs: object) -> RunSummary:
+        captured["exporter"] = args[3]
+        return summary
+
     monkeypatch.setattr(cli, "build_dependencies", lambda _: (object(), storage))
-    monkeypatch.setattr(cli, "run_collection", lambda *args, **kwargs: summary)
+    monkeypatch.setattr(cli, "run_collection", fake_run_collection)
 
     exit_code = cli.main(settings)
 
@@ -49,6 +56,7 @@ def test_main_initializes_storage_creates_directories_and_prints_summary(
     assert storage.initialized
     assert settings.database_path.parent.is_dir()
     assert settings.csv_directory.is_dir()
+    assert captured["exporter"] is append_daily_snapshot
     assert "run_id=run-1" in output.out
     assert "fUSD success rows=2" in output.out
     assert "fBTC empty rows=0" in output.out

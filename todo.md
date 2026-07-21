@@ -8,8 +8,8 @@
 - [x] 建立 workflow 手動執行入口
 - [x] 建立成功資料自動 commit 與 push
 - [x] 建立部分失敗仍保存成功市場資料的流程
-- [ ] 在 GitHub private repository 啟用 workflow 寫入權限
-- [ ] 從 GitHub Actions 手動執行並確認自動 commit
+- [x] 在 GitHub private repository 啟用 workflow 寫入權限
+- [x] 從 GitHub Actions 手動執行並確認自動 commit
 - [ ] 觀察至少一次 scheduled run
 
 ## 2026-07-14 特徵工程完成項目

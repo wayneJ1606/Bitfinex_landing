@@ -6,6 +6,14 @@
 
 本機離線驗證：`python -m pytest -q`，66 passed, 1 deselected。
 
+GitHub 遠端驗收：
+
+- Private repository：`wayneJ1606/Bitfinex_landing`，default branch 為 `master`，workflow 已取得 `contents: write` 權限。
+- 第一次手動 run `29839099062` 成功，建立自動資料 commit `9b11a66`。
+- 升級至 Node.js 24 runtime 的 `actions/checkout@v6` 與 `actions/setup-python@v6` 後，第二次手動 run `29839439761` 成功，建立資料 commit `39474a1`。
+- 當日 CSV 驗證結果：`fUSD=100` 列、`fBTC=54` 列、`fETH=52` 列；每檔只有一個標頭，且皆包含 2 個不同 `run_id`。
+- 尚待觀察下一次每小時第 17 分鐘的 scheduled run。
+
 ## 2026-07-14 本次交接狀態
 
 目前程式、文件與版本控制狀態：

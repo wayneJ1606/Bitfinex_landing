@@ -1,5 +1,17 @@
 # Bitfinex 放貸市場決策輔助系統待辦清單
 
+## 2026-07-21 GitHub Actions 自動收集
+
+- [x] 建立 UTC 每日、每市場 CSV 追加輸出
+- [x] 建立同一 run ID 去重與原子檔案更新
+- [x] 建立每小時第 17 分鐘 GitHub Actions 排程
+- [x] 建立 workflow 手動執行入口
+- [x] 建立成功資料自動 commit 與 push
+- [x] 建立部分失敗仍保存成功市場資料的流程
+- [ ] 在 GitHub private repository 啟用 workflow 寫入權限
+- [ ] 從 GitHub Actions 手動執行並確認自動 commit
+- [ ] 觀察至少一次 scheduled run
+
 ## 2026-07-14 特徵工程完成項目
 
 - [x] 建立 SQLite `modeling_features` 資料表

@@ -1,5 +1,11 @@
 # Bitfinex 放貸市場決策輔助系統進度紀錄
 
+## 2026-07-21 GitHub Actions 自動收集
+
+已完成每小時自動收集 workflow、依 UTC 日期分檔的每日市場 CSV 輸出、部分市場失敗時仍提交成功資料的行為、同一 run ID 去重，以及手動觸發入口。
+
+本機離線驗證：`python -m pytest -q`，66 passed, 1 deselected。
+
 ## 2026-07-14 本次交接狀態
 
 目前程式、文件與版本控制狀態：

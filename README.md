@@ -87,3 +87,27 @@ python -m bitfinex_lending.features
 目前的歷史快照數量仍少，這份資料集適合驗證管線，不足以支撐可靠的模型訓練或決策建議。
 
 所有時間均使用帶有 UTC offset 的 ISO 8601 格式。`amount > 0` 記為 `offer`，`amount < 0` 記為 `demand`。
+
+## GitHub Actions 每小時自動收集
+
+Repository 使用 `.github/workflows/collect-funding-books.yml`，在每小時第 17 分鐘（UTC）抓取 `fUSD`、`fBTC`、`fETH`，也可從 GitHub 的 **Actions → Collect Bitfinex funding books → Run workflow** 手動執行。
+
+資料依 UTC 日期追加到：
+
+```text
+data/raw/YYYY/MM/DD/fUSD.csv
+data/raw/YYYY/MM/DD/fBTC.csv
+data/raw/YYYY/MM/DD/fETH.csv
+```
+
+啟用步驟：
+
+1. 將 repository 設為 private 並推送 default branch。
+2. 到 **Settings → Actions → General → Workflow permissions**，允許 **Read and write permissions**。
+3. 到 Actions 頁面手動執行一次 workflow。
+4. 確認工作完成後出現 `data: collect funding books ... [skip ci]` commit。
+5. 再執行一次，確認當日 CSV 追加資料且只有一列標頭。
+
+workflow 使用 Bitfinex public endpoint，不需要 API key 或 GitHub secret。private repository 的 GitHub Free 帳戶目前包含每月 Actions 分鐘額度；此排程約執行 720 次/月，仍應每月從 **Settings → Billing and licensing** 檢查實際用量。
+
+GitHub scheduled workflow 可能延遲，資料時間以 CSV 的 `fetched_at` 為準。SQLite 是 runner 內的暫存記錄，不會提交；可在分析環境由 repo 中的 CSV 重建資料庫。

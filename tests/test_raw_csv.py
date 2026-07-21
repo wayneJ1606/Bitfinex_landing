@@ -92,6 +92,46 @@ def test_existing_raw_root_must_be_a_directory(tmp_path: Path) -> None:
         load_raw_snapshots(root)
 
 
+@pytest.mark.parametrize("method_name", ["exists", "is_dir"])
+def test_converts_root_inspection_oserror_to_raw_csv_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, method_name: str
+) -> None:
+    root = tmp_path / "raw"
+    root.mkdir()
+
+    def fail_inspection(path: Path) -> bool:
+        if path == root:
+            raise OSError("inspection denied")
+        return True
+
+    monkeypatch.setattr(Path, method_name, fail_inspection)
+
+    with pytest.raises(RawCsvError, match="inspection denied") as raised:
+        load_raw_snapshots(root)
+
+    assert isinstance(raised.value.__cause__, OSError)
+
+
+def test_converts_recursive_discovery_oserror_to_raw_csv_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = tmp_path / "raw"
+    root.mkdir()
+
+    def fail_discovery(path: Path, pattern: str):
+        assert path == root
+        assert pattern == "*.csv"
+        yield root / "2026/07/21/fUSD.csv"
+        raise OSError("discovery denied")
+
+    monkeypatch.setattr(Path, "rglob", fail_discovery)
+
+    with pytest.raises(RawCsvError, match="discovery denied") as raised:
+        load_raw_snapshots(root)
+
+    assert isinstance(raised.value.__cause__, OSError)
+
+
 @pytest.mark.parametrize(
     "relative_path",
     [

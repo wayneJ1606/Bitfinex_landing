@@ -28,15 +28,27 @@ class RawCsvError(ValueError):
 
 def load_raw_snapshots(root: Path) -> tuple[FundingBookRow, ...]:
     root = Path(root)
-    if not root.exists():
+    try:
+        exists = root.exists()
+    except OSError as error:
+        raise _root_error(error) from error
+    if not exists:
         return ()
-    if not root.is_dir():
+    try:
+        is_directory = root.is_dir()
+    except OSError as error:
+        raise _root_error(error) from error
+    if not is_directory:
         raise RawCsvError("invalid raw CSV root: raw root must be a directory")
+    try:
+        paths = sorted(root.rglob("*.csv"), key=lambda item: item.as_posix())
+    except OSError as error:
+        raise _root_error(error) from error
 
     parsed: list[tuple[datetime, FundingBookRow]] = []
     seen_rows: set[tuple[object, ...]] = set()
     run_times: dict[tuple[str, str], str] = {}
-    for path in sorted(root.rglob("*.csv"), key=lambda item: item.as_posix()):
+    for path in paths:
         _validate_raw_path(path, root)
         for line_number, values in _read_rows(path, root):
             row, timestamp = _parse_row(values, path, root, line_number)
@@ -72,6 +84,10 @@ def load_raw_snapshots(root: Path) -> tuple[FundingBookRow, ...]:
             ),
         )
     )
+
+
+def _root_error(error: OSError) -> RawCsvError:
+    return RawCsvError(f"invalid raw CSV root: {error}")
 
 
 def _validate_raw_path(path: Path, root: Path) -> None:

@@ -11,6 +11,8 @@ def test_collection_workflow_contract() -> None:
     assert "workflow_dispatch:" in text
     assert "contents: write" in text
     assert "cancel-in-progress: false" in text
+    assert "uses: actions/checkout@v6" in text
+    assert "uses: actions/setup-python@v6" in text
     assert "python-version: '3.11'" in text
     assert "python -m bitfinex_lending" in text
     assert "continue-on-error: true" in text

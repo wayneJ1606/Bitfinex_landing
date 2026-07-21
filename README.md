@@ -42,7 +42,7 @@ python -m bitfinex_lending
 預設輸出：
 
 - SQLite：`data/bitfinex_lending.sqlite3`
-- CSV：`data/csv/`
+- CSV：`data/raw/YYYY/MM/DD/<market>.csv`
 
 退出碼：
 
@@ -111,3 +111,5 @@ data/raw/YYYY/MM/DD/fETH.csv
 workflow 使用 Bitfinex public endpoint，不需要 API key 或 GitHub secret。private repository 的 GitHub Free 帳戶目前包含每月 Actions 分鐘額度；此排程約執行 720 次/月，仍應每月從 **Settings → Billing and licensing** 檢查實際用量。
 
 GitHub scheduled workflow 可能延遲，資料時間以 CSV 的 `fetched_at` 為準。SQLite 是 runner 內的暫存記錄，不會提交；可在分析環境由 repo 中的 CSV 重建資料庫。
+
+Workflow 執行期間不支援外部或手動寫入 `data/raw`。若 push 衝突導致 rebase 失敗，該次 runner 內尚未推送的暫存收集結果可能遺失；解決衝突後請手動重新執行 workflow。

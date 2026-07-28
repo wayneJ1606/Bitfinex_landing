@@ -14,6 +14,21 @@
 
 目前可直接執行的第一階段本機工作均已完成。待 GitHub Actions 驗收的項目為手動執行一次每日建模 workflow，以及觀察第一次 `18:37 UTC` scheduled modeling run。盤點時 GitHub CLI 的既有 token 已失效，需重新執行 `gh auth login -h github.com` 後才能觸發並讀取遠端 run 證據。決策樹、XGBoost、回測、決策輔助輸出與 Demo 屬第二階段，需在第一批 168 筆模型結果產生後另行設計與實作。
 
+GitHub CLI 重新登入後，已完成每日建模 workflow 的手動遠端驗收：
+
+- Workflow：`Build Bitfinex modeling dataset`
+- Run ID：`30369249612`
+- Event：`workflow_dispatch`
+- 結果：`success`
+- 執行時間：2026-07-28 14:37:06–14:37:38 UTC，job 約 32 秒
+- 離線測試：110 passed, 1 deselected
+- 載入 8,440 筆 raw rows，重建 246 筆 features
+- `fBTC`、`fETH`、`fUSD` 各 82 筆 features、80 筆有效模型資料，均為 `insufficient_data`
+- 建模輸出 commit：`941d189` (`data: rebuild modeling dataset at 2026-07-28T14:37Z [skip ci]`)
+- 該 commit 僅修改 `data/modeling` 下四個固定輸出檔；raw CSV 更新來自前一個獨立 collector commit `f012ef1`
+
+手動驗收已完成。每日 `18:37 UTC` 的第一次 scheduled modeling run 尚未發生，維持待觀察。
+
 ## 2026-07-28 自動特徵工程與第一階段建模完成
 
 已在隔離分支 `feature/automated-feature-modeling` 完成 repository raw CSV 到模型輸出的每日管線。資料不足不阻塞執行；系統先輸出 `insufficient_data`，待歷史資料補齊後以同一命令重跑。

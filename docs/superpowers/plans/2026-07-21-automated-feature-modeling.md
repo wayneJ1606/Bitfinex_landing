@@ -543,13 +543,13 @@ git add README.md progress.md todo.md data/modeling
 git commit -m "docs: deliver automated feature modeling"
 ```
 
-- [ ] **Step 5: Push and manually run the daily workflow**
+- [x] **Step 5: Push and manually run the daily workflow**
 
 Push the reviewed branch/default branch according to the selected finishing workflow. On GitHub, run **Build Bitfinex modeling dataset** with `workflow_dispatch`.
 
 Expected: tests and modeling succeed; a `[skip ci]` modeling-data commit is created only if outputs differ; `data/raw` is unchanged.
 
-- [ ] **Step 6: Record GitHub evidence**
+- [x] **Step 6: Record GitHub evidence**
 
 Record the manual run URL/ID, data commit SHA or no-change result, market statuses, and actual job duration in `progress.md`. Check the manual GitHub acceptance item in `todo.md`, commit, and push. Leave the scheduled-run item unchecked until an actual `schedule` event succeeds.
 

@@ -12,7 +12,7 @@
 - [x] 執行本地 production path 與完整離線驗收（110 passed, 1 deselected）
 - [x] 確認目前三市場資料不足時輸出 `insufficient_data`，不產生誤導性模型結果
 - [x] 將功能分支整合並推送至 GitHub
-- [ ] 手動執行一次 Build Bitfinex modeling dataset workflow
+- [x] 手動執行一次 Build Bitfinex modeling dataset workflow
 - [ ] 觀察至少一次每日 scheduled modeling run
 - [ ] 任一市場達 168 筆有效資料後，確認三個第一階段模型產生評估與預測
 

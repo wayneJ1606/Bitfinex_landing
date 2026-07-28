@@ -1,5 +1,21 @@
 # Bitfinex 放貸市場決策輔助系統待辦清單
 
+## 2026-07-21 自動特徵工程與建模
+
+- [x] 完成嚴格 Repository 原始 CSV 載入器與驗證矩陣
+- [x] 確認中斷成果保存在 `feature/automated-feature-modeling` worktree
+- [x] 執行功能分支基準測試（94 passed, 1 deselected）
+- [x] 完成 168 筆門檻、時序切分、兩個 baseline 與線性迴歸
+- [x] 完成 model status／evaluation／prediction 固定格式 CSV
+- [x] 完成 `python -m bitfinex_lending.modeling` 建模命令
+- [x] 完成每日 18:37 UTC GitHub Actions 建模 workflow
+- [x] 執行本地 production path 與完整離線驗收（110 passed, 1 deselected）
+- [x] 確認目前三市場資料不足時輸出 `insufficient_data`，不產生誤導性模型結果
+- [ ] 將功能分支整合並推送至 GitHub
+- [ ] 手動執行一次 Build Bitfinex modeling dataset workflow
+- [ ] 觀察至少一次每日 scheduled modeling run
+- [ ] 任一市場達 168 筆有效資料後，確認三個第一階段模型產生評估與預測
+
 ## 2026-07-21 GitHub Actions 自動收集
 
 - [x] 建立 UTC 每日、每市場 CSV 追加輸出
@@ -70,7 +86,7 @@
 - [ ] 建立回測結果資料表
 - [x] 實作原始整理資料寫入 SQLite
 - [x] 實作建模資料集輸出 CSV
-- [ ] 實作模型評估表輸出 CSV
+- [x] 實作模型評估表輸出 CSV
 - [ ] 實作回測結果表輸出 CSV
 
 ## 特徵工程
@@ -95,16 +111,16 @@
 
 ## 建模
 
-- [ ] 建立訓練集與驗證集切分流程
-- [ ] 建立 baseline：平均值預測
-- [ ] 建立 baseline：前一期利率預測
-- [ ] 訓練線性迴歸模型
+- [x] 建立訓練集與驗證集切分流程
+- [x] 建立 baseline：平均值預測
+- [x] 建立 baseline：前一期利率預測
+- [x] 訓練線性迴歸模型
 - [ ] 訓練決策樹模型
 - [ ] 訓練 XGBoost 模型
-- [ ] 輸出 MAE
-- [ ] 輸出 RMSE
-- [ ] 輸出 R2
-- [ ] 建立模型比較表
+- [x] 輸出 MAE
+- [x] 輸出 RMSE
+- [x] 輸出 R2
+- [x] 建立模型比較表
 - [ ] 建立預測值與實際值比較圖
 - [ ] 撰寫模型結果解讀
 

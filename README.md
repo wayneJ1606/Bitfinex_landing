@@ -113,3 +113,23 @@ workflow 使用 Bitfinex public endpoint，不需要 API key 或 GitHub secret�
 GitHub scheduled workflow 可能延遲，資料時間以 CSV 的 `fetched_at` 為準。SQLite 是 runner 內的暫存記錄，不會提交；可在分析環境由 repo 中的 CSV 重建資料庫。
 
 Workflow 執行期間不支援外部或手動寫入 `data/raw`。若 push 衝突導致 rebase 失敗，該次 runner 內尚未推送的暫存收集結果可能遺失；解決衝突後請手動重新執行 workflow。
+
+## 自動特徵工程與第一階段模型
+
+安裝建模相依套件並執行：
+
+```powershell
+python -m pip install -e ".[test,modeling]"
+python -m bitfinex_lending.modeling
+```
+
+命令以 repository 的 `data/raw` 為唯一輸入，完整重建以下檔案：
+
+- `data/modeling/modeling_features.csv`
+- `data/modeling/model_status.csv`
+- `data/modeling/model_evaluations.csv`
+- `data/modeling/predictions.csv`
+
+每個市場必須有至少 168 筆 predictor 與下一期目標均完整的有效特徵，才會依時間順序進行 80%／20% 切分，評估 `baseline_mean`、`baseline_previous` 與 `linear_regression`，並輸出 MAE、RMSE 與 R²。資料不足不是執行錯誤：狀態會記為 `insufficient_data`，評估與預測 CSV 只保留標頭；歷史資料補齊後執行相同命令即可開始模型評估。
+
+`.github/workflows/build-modeling-dataset.yml` 每日 `18:37 UTC` 自動執行，也支援從 GitHub Actions 手動觸發。它會先跑完整離線測試，再重建並只提交 `data/modeling`。此流程僅供研究與決策輔助，不會登入帳戶、自動下單或保證收益。

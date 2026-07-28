@@ -1,17 +1,18 @@
 # Bitfinex 放貸市場決策輔助系統進度紀錄
 
-## 2026-07-21 自動特徵工程與建模續作盤點
+## 2026-07-28 自動特徵工程與第一階段建模完成
 
-目前開發已從 `master` 的設計／實作計畫，進入隔離分支
-`feature/automated-feature-modeling`。兩次中斷的成果均已提交，工作樹乾淨，沒有遺失或未提交修改。
+已在隔離分支 `feature/automated-feature-modeling` 完成 repository raw CSV 到模型輸出的每日管線。資料不足不阻塞執行；系統先輸出 `insufficient_data`，待歷史資料補齊後以同一命令重跑。
 
-- Task 1「Repository 原始 CSV 載入器」已完成：包含遞迴掃描、嚴格欄位與路徑驗證、UTC 正規化、精確列去重及衝突檢查。
-- Task 1 實作位於 `bitfinex_lending/raw_csv.py`，測試位於 `tests/test_raw_csv.py`。
-- 功能分支基準驗證：`python -m pytest -q` 為 `94 passed, 1 deselected`。
-- Task 2–5 尚待完成：模型訓練、固定格式輸出／CLI、每日建模 workflow、文件與正式驗收。
-- Repository 目前只有每個市場 2 個 snapshot；模型需每個市場至少 168 筆有效特徵觀測，因此現階段預期輸出 `insufficient_data`，不會訓練模型。
+- 完成嚴格 raw CSV 載入、UTC 正規化、驗證、去重與特徵重建。
+- 完成每市場 168 筆有效資料門檻、80%／20% 時序切分、`baseline_mean`、`baseline_previous` 與線性迴歸。
+- 完成 MAE、RMSE、R²、模型狀態、評估及逐筆預測固定格式 CSV。
+- 完成 `python -m bitfinex_lending.modeling` 與每日 `18:37 UTC` GitHub Actions workflow。
+- 完整離線測試：`python -m pytest -q`，110 passed, 1 deselected。
+- 本機 production path：載入 206 筆 raw rows，產生 6 筆特徵；`fBTC`、`fETH`、`fUSD` 各有 2 個 snapshot、0 筆完整有效模型資料，均正確輸出 `insufficient_data`。
+- `model_evaluations.csv` 與 `predictions.csv` 目前只有固定標頭，未產生或宣稱任何訓練結果。
 
-下一個實作點是 Task 2：`baseline_mean`、`baseline_previous`、`linear_regression`、時序 80/20 切分與 MAE／RMSE／R²。
+下一步是持續由每小時 collector 累積資料。任一市場達到 168 筆完整有效資料後，每日 workflow 會自動訓練並評估該市場；其他不足市場仍維持 `insufficient_data`。
 
 ## 2026-07-21 GitHub Actions 自動收集
 

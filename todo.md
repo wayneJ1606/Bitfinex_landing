@@ -11,7 +11,7 @@
 - [x] 完成每日 18:37 UTC GitHub Actions 建模 workflow
 - [x] 執行本地 production path 與完整離線驗收（110 passed, 1 deselected）
 - [x] 確認目前三市場資料不足時輸出 `insufficient_data`，不產生誤導性模型結果
-- [ ] 將功能分支整合並推送至 GitHub
+- [x] 將功能分支整合並推送至 GitHub
 - [ ] 手動執行一次 Build Bitfinex modeling dataset workflow
 - [ ] 觀察至少一次每日 scheduled modeling run
 - [ ] 任一市場達 168 筆有效資料後，確認三個第一階段模型產生評估與預測
@@ -26,7 +26,7 @@
 - [x] 建立部分失敗仍保存成功市場資料的流程
 - [x] 在 GitHub private repository 啟用 workflow 寫入權限
 - [x] 從 GitHub Actions 手動執行並確認自動 commit
-- [ ] 觀察至少一次 scheduled run
+- [x] 觀察至少一次 scheduled run
 
 ## 2026-07-14 特徵工程完成項目
 
@@ -169,19 +169,19 @@
 - [x] 可抓取 `fUSD`、`fBTC`、`fETH`
 - [x] SQLite 成功保存原始整理資料
 - [x] CSV 成功輸出建模資料集
-- [ ] 可建立 baseline
-- [ ] 可訓練線性迴歸
+- [x] 可建立 baseline
+- [x] 可訓練線性迴歸
 - [ ] 可訓練決策樹
 - [ ] 可訓練 XGBoost
-- [ ] 可輸出 MAE、RMSE、R2
-- [ ] 可比較各模型表現
+- [x] 可輸出 MAE、RMSE、R2
+- [x] 可比較各模型表現
 - [ ] 可執行 baseline 策略回測
 - [ ] 可執行模型策略回測
 - [ ] 可計算模擬成交率
 - [ ] 可計算資金利用率
 - [ ] 可計算平均等待時間
 - [ ] 可輸出建議觀察利率區間
-- [ ] 可顯示風險與使用限制
-- [ ] 所有建議明確標示需人工確認
-- [ ] 系統不自動下單
+- [x] 可顯示風險與使用限制
+- [x] 所有建議明確標示需人工確認
+- [x] 系統不自動下單
 - [ ] 文件足以讓使用者安裝、執行、訓練模型、執行回測與查看結果

@@ -294,7 +294,7 @@ Run: `python -m pytest tests/test_feature_calculation.py tests/test_model_traini
 
 Expected: existing feature behavior and new training behavior both pass.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add pyproject.toml bitfinex_lending/models.py bitfinex_lending/model_training.py tests/test_model_training.py
@@ -315,7 +315,7 @@ git commit -m "feat: evaluate baseline and linear models"
 - Consumes: `load_raw_snapshots`, `calculate_features`, `evaluate_models`, and `export_modeling_features`.
 - Produces: `ModelingCsvError`, `export_modeling_results(result: ModelingResult, output_directory: Path) -> tuple[Path, Path, Path]`, `ModelingRunSummary`, `run_modeling_pipeline(raw_root: Path, output_root: Path, run_at: str, *, loader=load_raw_snapshots, calculator=calculate_features, evaluator=evaluate_models, feature_exporter=export_modeling_features, result_exporter=export_modeling_results) -> ModelingRunSummary`, and CLI `main(settings: ModelingSettings | None = None) -> int` where frozen `ModelingSettings` defaults to `Path("data/raw")`, `Path("data/modeling")`, and `168` required rows.
 
-- [ ] **Step 1: Write failing fixed-schema and atomic output tests**
+- [x] **Step 1: Write failing fixed-schema and atomic output tests**
 
 In `tests/test_modeling_csv.py`, construct a `ModelingResult` and assert exact schemas:
 
@@ -327,19 +327,19 @@ PREDICTION_FIELDS = ("run_at", "market", "feature_time", "model_name", "predicte
 
 Assert stable sorting, UTF-8, header-only evaluation/prediction files for insufficient data, atomic replacement, and `.tmp` cleanup after injected `Path.replace` failure.
 
-- [ ] **Step 2: Run CSV RED verification**
+- [x] **Step 2: Run CSV RED verification**
 
 Run: `python -m pytest tests/test_modeling_csv.py -v`
 
 Expected: module import fails.
 
-- [ ] **Step 3: Implement focused atomic exporters**
+- [x] **Step 3: Implement focused atomic exporters**
 
 Create `modeling_csv.py` with a shared private `_export(filename, fields, rows, output_directory)` that creates the directory, writes `filename.tmp`, and atomically replaces the target. Export status, evaluation, and prediction files only; `modeling_features.csv` remains owned by the existing `feature_csv.py` boundary.
 
 Catch `OSError` and `csv.Error`, perform best-effort temp cleanup without masking the original exception, and raise `ModelingCsvError`.
 
-- [ ] **Step 4: Write failing pipeline and CLI tests**
+- [x] **Step 4: Write failing pipeline and CLI tests**
 
 In `tests/test_modeling.py`, inject loader, calculator, evaluator, and exporters and assert call order plus summary:
 
@@ -361,7 +361,7 @@ assert summary.feature_rows == 2
 
 Assert `main()` defaults to `data/raw` and `data/modeling`, prints one line per market and all four paths, returns `0` for all-insufficient results, and returns `1` with `fatal:` for `OSError`, `RawCsvError`, `FeatureCalculationError`, `ModelTrainingError`, `FeatureCsvError`, or `ModelingCsvError`.
 
-- [ ] **Step 5: Implement command orchestration**
+- [x] **Step 5: Implement command orchestration**
 
 Create `modeling.py` with:
 
@@ -385,7 +385,7 @@ class ModelingRunSummary:
 
 `run_modeling_pipeline` loads all raw rows, calculates all features in memory, evaluates models, writes `modeling_features.csv`, then writes the three result CSVs. `main()` uses `datetime.now(timezone.utc).isoformat()`, catches the specified domain errors, and is exposed through `python -m bitfinex_lending.modeling`.
 
-- [ ] **Step 6: Run GREEN and integration tests**
+- [x] **Step 6: Run GREEN and integration tests**
 
 Run: `python -m pytest tests/test_modeling_csv.py tests/test_modeling.py -v`
 
@@ -395,7 +395,7 @@ Run: `python -m pytest tests/test_raw_csv.py tests/test_feature_calculation.py t
 
 Expected: complete raw-to-model pipeline test set passes.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add bitfinex_lending/modeling_csv.py bitfinex_lending/modeling.py tests/test_modeling_csv.py tests/test_modeling.py
@@ -415,7 +415,7 @@ git commit -m "feat: add modeling dataset command"
 - Consumes: `python -m bitfinex_lending.modeling` from Task 3.
 - Produces: a write-capable daily/manual workflow serialized with collection and using the `modeling` optional dependency delivered by Task 2.
 
-- [ ] **Step 1: Write failing dependency and workflow contract tests**
+- [x] **Step 1: Write failing dependency and workflow contract tests**
 
 Create `tests/test_modeling_workflow.py` and assert:
 
@@ -439,13 +439,13 @@ assert "git push" in workflow
 assert "--force" not in workflow
 ```
 
-- [ ] **Step 2: Run RED verification**
+- [x] **Step 2: Run RED verification**
 
 Run: `python -m pytest tests/test_modeling_workflow.py -v`
 
 Expected: missing workflow and shared-concurrency assertions fail.
 
-- [ ] **Step 3: Share concurrency and create workflow**
+- [x] **Step 3: Share concurrency and create workflow**
 
 Change the collector group to `bitfinex-repository-writer`. Create `.github/workflows/build-modeling-dataset.yml` mirroring the reviewed collector patterns with:
 
@@ -464,7 +464,7 @@ concurrency:
 
 Use `ubuntu-latest`, timeout 10 minutes, `actions/checkout@v6` with full history, `actions/setup-python@v6`, install `.[test,modeling]`, run `python -m pytest -q`, then `python -m bitfinex_lending.modeling`. Configure the Actions bot identity, stage only `data/modeling`, skip empty commits, commit `data: rebuild modeling dataset at <UTC> [skip ci]`, and retry one rejected push with pull/rebase. Do not use `continue-on-error` for tests or modeling.
 
-- [ ] **Step 4: Run workflow GREEN and full suite**
+- [x] **Step 4: Run workflow GREEN and full suite**
 
 Run: `python -m pytest tests/test_workflow.py tests/test_modeling_workflow.py -v`
 
@@ -474,7 +474,7 @@ Run: `python -m pytest -q`
 
 Expected: all offline tests pass; the live integration test remains deselected.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add .github/workflows/collect-funding-books.yml .github/workflows/build-modeling-dataset.yml tests/test_modeling_workflow.py
@@ -495,7 +495,7 @@ git commit -m "ci: build modeling dataset daily"
 - Consumes: completed command and workflow from Tasks 1-4.
 - Produces: operator documentation, current insufficient-data outputs, and remote acceptance evidence.
 
-- [ ] **Step 1: Document command, schedule, outputs, and limits**
+- [x] **Step 1: Document command, schedule, outputs, and limits**
 
 Add a README section documenting:
 
@@ -506,13 +506,13 @@ python -m bitfinex_lending.modeling
 
 Describe the four `data/modeling` files, 168 eligible-row threshold, 80%／20% chronological split, three first-stage models, daily `18:37 UTC` schedule, manual workflow trigger, research-only status, and absence of automatic orders or guaranteed returns.
 
-- [ ] **Step 2: Update project tracking without premature claims**
+- [x] **Step 2: Update project tracking without premature claims**
 
 In `todo.md`, mark raw-CSV ingestion, automated feature rebuild, two baselines, linear regression, MAE/RMSE/R², fixed evaluation/prediction CSVs, and daily workflow implementation complete. Add unchecked remote checks for manual workflow success and first scheduled run.
 
 In `progress.md`, record the actual final test count and local command results. Do not claim trained models while current markets remain below 168 eligible rows.
 
-- [ ] **Step 3: Run local production path**
+- [x] **Step 3: Run local production path**
 
 Run:
 
@@ -524,7 +524,7 @@ Expected with the current repository data: three markets appear in `model_status
 
 Read all four CSVs and verify exact headers, market counts, one row per market status, and no raw-file modification.
 
-- [ ] **Step 4: Run final local verification and commit generated outputs**
+- [x] **Step 4: Run final local verification and commit generated outputs**
 
 Run:
 

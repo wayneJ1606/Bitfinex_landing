@@ -1,5 +1,19 @@
 # Bitfinex 放貸市場決策輔助系統進度紀錄
 
+## 2026-07-28 同步後待辦盤點與模型資料重建
+
+本機 `master` 已與 `origin/master` 同步，第一階段自動建模功能已合併並推送。遠端每小時 collector 已持續產生跨日資料 commits，確認 scheduled collection 正常運作。
+
+使用同步後的完整 repository raw CSV 重新執行 `python -m bitfinex_lending.modeling`：
+
+- 載入 8,338 筆 funding-book rows。
+- 重建 243 筆 snapshot features；`fBTC`、`fETH`、`fUSD` 各 81 筆。
+- 每市場各有 79 筆完整有效模型資料，距離 168 筆門檻仍差 89 筆。
+- 三市場均正確輸出 `insufficient_data`。
+- `model_evaluations.csv` 與 `predictions.csv` 維持只有標頭，未產生不可信的模型結果。
+
+目前可直接執行的第一階段本機工作均已完成。待 GitHub Actions 驗收的項目為手動執行一次每日建模 workflow，以及觀察第一次 `18:37 UTC` scheduled modeling run。盤點時 GitHub CLI 的既有 token 已失效，需重新執行 `gh auth login -h github.com` 後才能觸發並讀取遠端 run 證據。決策樹、XGBoost、回測、決策輔助輸出與 Demo 屬第二階段，需在第一批 168 筆模型結果產生後另行設計與實作。
+
 ## 2026-07-28 自動特徵工程與第一階段建模完成
 
 已在隔離分支 `feature/automated-feature-modeling` 完成 repository raw CSV 到模型輸出的每日管線。資料不足不阻塞執行；系統先輸出 `insufficient_data`，待歷史資料補齊後以同一命令重跑。

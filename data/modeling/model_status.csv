@@ -1,4 +1,4 @@
 market,status,feature_rows,valid_rows,required_rows,message
-fBTC,insufficient_data,84,82,168,requires 168 eligible rows; found 82
-fETH,insufficient_data,84,82,168,requires 168 eligible rows; found 82
-fUSD,insufficient_data,84,82,168,requires 168 eligible rows; found 82
+fBTC,insufficient_data,95,93,168,requires 168 eligible rows; found 93
+fETH,insufficient_data,95,93,168,requires 168 eligible rows; found 93
+fUSD,insufficient_data,95,93,168,requires 168 eligible rows; found 93

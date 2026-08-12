@@ -1,4 +1,4 @@
 market,status,feature_rows,valid_rows,required_rows,message
-fBTC,trained,272,270,168,"evaluated baseline_mean, baseline_previous, and linear_regression"
-fETH,trained,272,270,168,"evaluated baseline_mean, baseline_previous, and linear_regression"
-fUSD,trained,272,270,168,"evaluated baseline_mean, baseline_previous, and linear_regression"
+fBTC,trained,288,286,168,"evaluated baseline_mean, baseline_previous, and linear_regression"
+fETH,trained,288,286,168,"evaluated baseline_mean, baseline_previous, and linear_regression"
+fUSD,trained,288,286,168,"evaluated baseline_mean, baseline_previous, and linear_regression"

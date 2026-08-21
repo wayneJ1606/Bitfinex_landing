@@ -23,6 +23,23 @@ data/*.sqlite3-*
 data/csv/*.csv
 data/csv/*.tmp
 data/raw/**/*.tmp
+data/local-collector.log
+data/*.lock
+
+# Sensitive private-account data must remain local
+.env
+.env.*
+!.env.example
+data/account/
+data/metadata/account_collector_status.json
+data/metadata/private_collection_status.json
+data/metadata/collector_runs/**/private.csv
+data/modeling/p0_aligned_private_market.csv
+data/modeling/p0_offer_lifecycle.csv
+data/modeling/p0_offer_trade_matches.csv
+
+# Disposable test synchronization workspaces
+.test-tmp-sync-*/
 
 # Editor and operating-system files
 .vscode/

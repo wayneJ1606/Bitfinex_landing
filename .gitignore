@@ -37,6 +37,7 @@ data/metadata/collector_runs/**/private.csv
 data/modeling/p0_aligned_private_market.csv
 data/modeling/p0_offer_lifecycle.csv
 data/modeling/p0_offer_trade_matches.csv
+data/modeling/p0_fixed_baselines.csv
 
 # Disposable test synchronization workspaces
 .test-tmp-sync-*/

@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import logging
 import json
+import msvcrt
 import os
+import threading
 import time
 import argparse
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Protocol
+from typing import Any, Callable, Protocol, TextIO
 from uuid import uuid4
 
 import requests
@@ -57,6 +59,16 @@ class CollectionSummary:
     permission_checked: bool = True
 
 
+@dataclass
+class _HeldCollectorLock:
+    handle: TextIO
+    thread_lock: Any
+
+
+_THREAD_LOCKS_GUARD = threading.Lock()
+_THREAD_LOCKS: dict[Path, Any] = {}
+
+
 def run_private_collection(
     client: PrivateClientLike,
     storage: AccountStorageLike,
@@ -72,7 +84,7 @@ def run_private_collection(
         raise ValueError("max_attempts must be at least 1")
     storage.initialize()
     lock_path = storage.root / ".private-collector.lock"
-    _acquire_lock(lock_path)
+    lock = _acquire_lock(lock_path)
     run_id = str(run_id_factory())
     started_at = clock().astimezone(timezone.utc).isoformat()
     try:
@@ -166,7 +178,7 @@ def run_private_collection(
             )
         return summary
     finally:
-        _release_lock(lock_path)
+        _release_lock(lock)
 
 
 def _fetch_with_retry(
@@ -202,52 +214,43 @@ def _dataset_rows(response: object) -> list[Any]:
     return response
 
 
-def _acquire_lock(path: Path) -> None:
-    while True:
-        try:
-            descriptor = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-            with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
-                json.dump({"pid": os.getpid()}, handle)
-            return
-        except FileExistsError as error:
-            if not _lock_owner_is_gone(path):
-                raise RuntimeError("private collector is already running") from error
-            try:
-                path.unlink()
-            except FileNotFoundError:
-                pass
-
-
-def _lock_owner_is_gone(path: Path) -> bool:
+def _acquire_lock(path: Path) -> _HeldCollectorLock:
+    resolved_path = path.resolve()
+    with _THREAD_LOCKS_GUARD:
+        thread_lock = _THREAD_LOCKS.setdefault(resolved_path, threading.Lock())
+    if not thread_lock.acquire(blocking=False):
+        raise RuntimeError("private collector is already running")
     try:
-        contents = path.read_text(encoding="utf-8").strip()
-        metadata = json.loads(contents)
-        pid = metadata["pid"] if isinstance(metadata, dict) else metadata
-    except json.JSONDecodeError:
-        try:
-            pid = int(contents)
-        except (UnboundLocalError, ValueError):
-            return False
-    except (OSError, KeyError, TypeError):
-        return False
-    if not isinstance(pid, int) or pid <= 0:
-        return False
-    try:
-        os.kill(pid, 0)
-    except ProcessLookupError:
-        return True
-    except PermissionError:
-        return False
+        path.touch(exist_ok=True)
+        handle = path.open("r+", encoding="utf-8")
+        if handle.seek(0, os.SEEK_END) == 0:
+            handle.write("0")
+            handle.flush()
+        handle.seek(0)
+        msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+        handle.seek(0)
+        handle.truncate()
+        json.dump({"pid": os.getpid()}, handle)
+        handle.flush()
+        return _HeldCollectorLock(handle, thread_lock)
     except OSError as error:
-        return getattr(error, "winerror", None) == 87
-    return False
+        try:
+            handle.close()
+        except UnboundLocalError:
+            pass
+        thread_lock.release()
+        raise RuntimeError("private collector is already running") from error
 
 
-def _release_lock(path: Path) -> None:
+def _release_lock(lock: _HeldCollectorLock) -> None:
     try:
-        path.unlink()
-    except FileNotFoundError:
-        pass
+        lock.handle.seek(0)
+        msvcrt.locking(lock.handle.fileno(), msvcrt.LK_UNLCK, 1)
+    finally:
+        try:
+            lock.handle.close()
+        finally:
+            lock.thread_lock.release()
 
 
 def _safe_error_text(error: Exception) -> str:

@@ -1,8 +1,10 @@
 from datetime import datetime, timezone
+import threading
 
 import pytest
 
 from bitfinex_lending.account_storage import AccountStorageError
+from bitfinex_lending import private_account_collector as module
 from bitfinex_lending.private_account_collector import run_private_collection
 from bitfinex_lending.private_client import PrivateClientError, PrivatePermissionError
 from bitfinex_lending.collector_run_history import load_collector_runs
@@ -241,10 +243,13 @@ def test_lock_prevents_second_collector(tmp_path):
     client = FakeClient()
     storage = FakeStorage(tmp_path / "account")
     storage.root.mkdir(parents=True)
-    (storage.root / ".private-collector.lock").write_text("existing", encoding="utf-8")
+    lock = module._acquire_lock(storage.root / ".private-collector.lock")
 
-    with pytest.raises(RuntimeError, match="already running"):
-        run_private_collection(client, storage, collected_at=datetime.now(timezone.utc))
+    try:
+        with pytest.raises(RuntimeError, match="already running"):
+            run_private_collection(client, storage, collected_at=datetime.now(timezone.utc))
+    finally:
+        module._release_lock(lock)
     assert client.calls == []
 
 
@@ -259,7 +264,48 @@ def test_stale_collector_lock_from_a_crashed_process_is_recovered(tmp_path):
     )
 
     assert summary.failures == {}
-    assert not (storage.root / ".private-collector.lock").exists()
+    recovered_lock = module._acquire_lock(storage.root / ".private-collector.lock")
+    module._release_lock(recovered_lock)
+
+
+def test_two_stale_lock_recoverers_cannot_both_acquire_the_lock(tmp_path):
+    lock_path = tmp_path / ".private-collector.lock"
+    lock_path.write_text("999999999", encoding="utf-8")
+    first_acquired = threading.Event()
+    successes = []
+    failures = []
+    release_first = threading.Event()
+
+    def acquire_first():
+        try:
+            lock = module._acquire_lock(lock_path)
+            successes.append("first")
+            first_acquired.set()
+            assert release_first.wait(timeout=2)
+            module._release_lock(lock)
+        except Exception as error:
+            failures.append(error)
+
+    def acquire_second():
+        try:
+            module._acquire_lock(lock_path)
+            successes.append("second")
+        except Exception as error:
+            failures.append(error)
+
+    first = threading.Thread(target=acquire_first)
+    second = threading.Thread(target=acquire_second)
+    first.start()
+    assert first_acquired.wait(timeout=2)
+    second.start()
+    second.join(timeout=2)
+    release_first.set()
+    first.join(timeout=2)
+
+    assert not first.is_alive()
+    assert not second.is_alive()
+    assert successes == ["first"]
+    assert len(failures) == 1
 
 
 def test_private_collection_records_exact_endpoint_and_permission_history(tmp_path):

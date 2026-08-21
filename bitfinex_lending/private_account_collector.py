@@ -13,7 +13,7 @@ from uuid import uuid4
 
 import requests
 
-from .account_storage import AccountStorage
+from .account_storage import AccountStorage, AccountStorageError
 from .config import Settings
 from .private_client import (
     PrivateClientError,
@@ -120,7 +120,13 @@ def run_private_collection(
                 row_counts[dataset] = storage.append_snapshot(
                     dataset, collected_text, normalized_rows
                 )
-            except (PrivateClientError, OSError, ValueError, TypeError) as error:
+            except (
+                AccountStorageError,
+                PrivateClientError,
+                OSError,
+                ValueError,
+                TypeError,
+            ) as error:
                 failures[dataset] = _safe_error_text(error)
                 logging.getLogger(__name__).warning(
                     "private dataset %s failed: %s", dataset, failures[dataset]

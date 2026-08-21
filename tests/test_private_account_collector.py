@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 
 import pytest
 
+from bitfinex_lending.account_storage import AccountStorageError
 from bitfinex_lending.private_account_collector import run_private_collection
 from bitfinex_lending.private_client import PrivateClientError, PrivatePermissionError
 from bitfinex_lending.collector_run_history import load_collector_runs
@@ -123,6 +124,31 @@ def test_single_endpoint_failure_is_recorded_without_losing_other_data(tmp_path)
     assert summary.row_counts["funding_offers"] == 1
     assert "funding_trades" in summary.failures
     assert storage.statuses[-1]["status"] == "partial"
+
+
+def test_storage_failure_is_recorded_safely_in_status_and_run_history(tmp_path):
+    class FailingStorage(FakeStorage):
+        def append_snapshot(self, dataset, collected_at, rows):
+            if dataset == "funding_offers":
+                raise AccountStorageError("storage-sentinel-secret")
+            return super().append_snapshot(dataset, collected_at, rows)
+
+    storage = FailingStorage(tmp_path / "account")
+    history_root = tmp_path / "metadata" / "collector_runs"
+    summary = run_private_collection(
+        FakeClient({"/v2/auth/r/funding/offers": [{"id": 1}]}),
+        storage,
+        collected_at=datetime(2026, 8, 16, tzinfo=timezone.utc),
+        run_history_root=history_root,
+        run_id_factory=lambda: "storage-failure",
+    )
+
+    assert "funding_offers" in summary.failures
+    assert storage.statuses[-1]["status"] == "partial"
+    assert "storage-sentinel-secret" not in str(storage.statuses[-1])
+    record = load_collector_runs(history_root)[0]
+    assert record.status == "partial"
+    assert "storage-sentinel-secret" not in str(record.failures)
 
 
 def test_non_list_dataset_response_is_recorded_as_a_failure(tmp_path):

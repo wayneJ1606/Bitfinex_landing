@@ -118,6 +118,7 @@ class ReadOnlyBitfinexClient:
             "content-type": "application/json",
             "accept": "application/json",
         }
+        failure: PrivateClientError | None = None
         try:
             response = self._session.post(
                 f"{self._base_url}{path}",
@@ -131,12 +132,17 @@ class ReadOnlyBitfinexClient:
         except requests.HTTPError as error:
             status_code = getattr(error.response, "status_code", None)
             if status_code == 429 or (isinstance(status_code, int) and status_code >= 500):
-                raise PrivateTransientError("Bitfinex authenticated service is temporarily unavailable") from error
-            raise PrivateClientError("Bitfinex authenticated request was rejected") from error
-        except requests.RequestException as error:
-            raise PrivateTransientError("Bitfinex authenticated network request failed") from error
-        except (ValueError, TypeError) as error:
-            raise PrivateTransientError("Bitfinex returned invalid authenticated JSON") from error
+                failure = PrivateTransientError(
+                    "Bitfinex authenticated service is temporarily unavailable"
+                )
+            else:
+                failure = PrivateClientError("Bitfinex authenticated request was rejected")
+        except requests.RequestException:
+            failure = PrivateTransientError("Bitfinex authenticated network request failed")
+        except (ValueError, TypeError):
+            failure = PrivateTransientError("Bitfinex returned invalid authenticated JSON")
+        assert failure is not None
+        raise failure
 
     def _next_nonce(self) -> str:
         candidate = int(self._nonce_factory())

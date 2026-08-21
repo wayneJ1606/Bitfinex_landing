@@ -91,3 +91,45 @@ def test_fetch_book_converts_invalid_json() -> None:
     assert caught.value.code == "invalid_json"
     assert str(caught.value) == "Bitfinex response was not valid JSON"
 
+
+@pytest.mark.parametrize(
+    ("method", "market", "path", "params"),
+    (
+        ("fetch_ticker", "fUSD", "/ticker/fUSD", {}),
+        ("fetch_funding_stats", "fUSD", "/funding/stats/fUSD/hist", {"limit": 1}),
+        (
+            "fetch_funding_candles",
+            "fUSD",
+            "/candles/trade:1h:fUSD:a30:p2:p30/hist",
+            {"limit": 1},
+        ),
+    ),
+)
+def test_market_requests_use_documented_v2_contract(
+    method: str, market: str, path: str, params: dict[str, object]
+) -> None:
+    session = FakeSession(FakeResponse(payload=[]))
+    client = BitfinexClient(session=session)
+
+    getattr(client, method)(market)
+
+    assert session.calls == [(f"https://api-pub.bitfinex.com/v2{path}", params, 10.0)]
+
+
+@pytest.mark.parametrize("method", ("fetch_ticker", "fetch_funding_stats", "fetch_funding_candles"))
+@pytest.mark.parametrize(
+    ("response", "code"),
+    (
+        (FakeResponse(http_error=requests.HTTPError("503 unavailable")), "http_error"),
+        (FakeResponse(json_error=requests.JSONDecodeError("invalid", "x", 0)), "invalid_json"),
+    ),
+)
+def test_market_requests_convert_response_failures_to_client_error(
+    method: str, response: FakeResponse, code: str
+) -> None:
+    client = BitfinexClient(session=FakeSession(response))
+
+    with pytest.raises(ClientError) as caught:
+        getattr(client, method)("fUSD")
+
+    assert caught.value.code == code

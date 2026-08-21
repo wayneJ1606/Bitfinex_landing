@@ -13,4 +13,6 @@ class Settings:
     timeout: float = 10.0
     database_path: Path = Path("data/bitfinex_lending.sqlite3")
     csv_directory: Path = Path("data/raw")
+    market_directory: Path = Path("data/market")
+    metadata_directory: Path = Path("data/metadata")
 

@@ -40,11 +40,24 @@ class BitfinexClient:
         self._timeout = timeout
 
     def fetch_book(self, market: str) -> object:
-        url = f"{self._base_url}/book/{market}/{self._precision}"
+        return self._get_json(f"/book/{market}/{self._precision}", {"len": self._length})
+
+    def fetch_ticker(self, market: str) -> object:
+        return self._get_json(f"/ticker/{market}", {})
+
+    def fetch_funding_stats(self, market: str) -> object:
+        return self._get_json(f"/funding/stats/{market}/hist", {"limit": 1})
+
+    def fetch_funding_candles(self, market: str) -> object:
+        key = f"trade:1h:{market}:a30:p2:p30"
+        return self._get_json(f"/candles/{key}/hist", {"limit": 1})
+
+    def _get_json(self, path: str, params: dict[str, Any]) -> object:
+        url = f"{self._base_url}{path}"
         try:
             response = self._session.get(
                 url,
-                params={"len": self._length},
+                params=params,
                 timeout=self._timeout,
             )
         except requests.RequestException as error:
@@ -65,4 +78,3 @@ class BitfinexClient:
             raise ClientError(
                 "invalid_json", "Bitfinex response was not valid JSON"
             ) from error
-

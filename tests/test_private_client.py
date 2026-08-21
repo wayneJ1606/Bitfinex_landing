@@ -2,6 +2,7 @@ import base64
 import hashlib
 import hmac
 import json
+import traceback
 
 import pytest
 import requests
@@ -200,6 +201,37 @@ def test_invalid_json_is_retryable_without_exposing_response_text():
 
     assert error.value.retryable is True
     assert "api-secret-abc" not in str(error.value)
+
+
+@pytest.mark.parametrize("failure_kind", ["network", "http", "json"])
+def test_sanitized_client_exception_chain_never_exposes_failure_details(failure_kind):
+    sentinel = "traceback-sentinel-secret"
+
+    class FailureResponse:
+        def raise_for_status(self):
+            if failure_kind == "http":
+                response = requests.Response()
+                response.status_code = 401
+                raise requests.HTTPError(sentinel, response=response)
+
+        def json(self):
+            if failure_kind == "json":
+                raise ValueError(sentinel)
+            return []
+
+    class FailureSession:
+        def post(self, *args, **kwargs):
+            if failure_kind == "network":
+                raise requests.ConnectionError(sentinel)
+            return FailureResponse()
+
+    with pytest.raises(Exception) as error:
+        make_client(FailureSession()).fetch_private("/v2/auth/r/funding/offers", {})
+
+    rendered = "".join(traceback.format_exception(error.type, error.value, error.tb))
+    assert sentinel not in rendered
+    assert error.value.__cause__ is None
+    assert error.value.__context__ is None
 
 
 def test_permission_response_never_exposes_secret_in_error():

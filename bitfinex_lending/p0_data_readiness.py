@@ -13,12 +13,14 @@ from .collector_run_history import CollectorRunRecord, load_collector_runs
 
 @dataclass(frozen=True)
 class ReadinessConfig:
-    min_exact_hours: float = 168.0
-    min_slot_coverage: float = 0.90
+    min_public_hours: float = 1440.0
     min_hourly_coverage: float = 0.90
+    max_public_gap_minutes: float = 360.0
+    min_strategy_observations: int = 30
+    # These thresholds are retained only to make historical private diagnostics comparable.
+    min_slot_coverage: float = 0.90
     min_success_rate: float = 0.95
     max_private_gap_minutes: float = 30.0
-    max_public_gap_minutes: float = 120.0
     min_offers: int = 30
     min_executed: int = 5
     min_canceled: int = 5
@@ -34,267 +36,160 @@ def _instant(value: str) -> datetime:
 
 
 def _read_rows(path: Path) -> list[dict[str, str]]:
-    if not Path(path).exists():
+    if not path.exists():
         return []
-    with Path(path).open(encoding="utf-8", newline="") as stream:
+    with path.open(encoding="utf-8", newline="") as stream:
         return list(csv.DictReader(stream))
 
 
 def _bucket(value: datetime, minutes: int) -> int:
-    seconds = minutes * 60
-    return int(value.timestamp()) // seconds
+    return int(value.timestamp()) // (minutes * 60)
 
 
-def _coverage(
-    records: list[CollectorRunRecord],
-    start: datetime,
-    end: datetime,
-    minutes: int,
-    *,
-    success_only: bool = False,
-) -> float:
-    first = _bucket(start, minutes)
-    last = _bucket(end, minutes)
+def _coverage(records: list[CollectorRunRecord], start: datetime, end: datetime, *, success_only: bool) -> float:
+    first, last = _bucket(start, 60), _bucket(end, 60)
     expected = max(1, last - first + 1)
     buckets = {
-        _bucket(_instant(record.started_at), minutes)
+        _bucket(_instant(record.started_at), 60)
         for record in records
-        if first <= _bucket(_instant(record.started_at), minutes) <= last
+        if first <= _bucket(_instant(record.started_at), 60) <= last
         and (not success_only or record.status == "success")
     }
     return min(1.0, len(buckets) / expected)
 
 
-def _records_in_buckets(
-    records: list[CollectorRunRecord],
-    start: datetime,
-    end: datetime,
-    minutes: int,
-) -> list[CollectorRunRecord]:
-    first = _bucket(start, minutes)
-    last = _bucket(end, minutes)
-    return [
-        record
-        for record in records
-        if first <= _bucket(_instant(record.started_at), minutes) <= last
-    ]
-
-
-def _success_rate(records: list[CollectorRunRecord]) -> float:
-    if not records:
-        return 0.0
-    return sum(record.status == "success" for record in records) / len(records)
-
-
-def _max_success_gap(
-    records: list[CollectorRunRecord], start: datetime, end: datetime
-) -> float:
-    times = sorted(
-        _instant(record.started_at)
-        for record in records
-        if record.status == "success"
-    )
+def _max_success_gap(records: list[CollectorRunRecord], start: datetime, end: datetime) -> float:
+    times = sorted(_instant(record.started_at) for record in records if record.status == "success")
     if not times:
         return math.inf
     gaps = [max(0.0, (times[0] - start).total_seconds() / 60)]
-    gaps.extend(
-        (later - earlier).total_seconds() / 60 for earlier, later in zip(times, times[1:])
-    )
+    gaps.extend((later - earlier).total_seconds() / 60 for earlier, later in zip(times, times[1:]))
     gaps.append(max(0.0, (end - times[-1]).total_seconds() / 60))
     return max(gaps)
 
 
-def evaluate_p0_readiness(
-    run_history_root: Path,
-    private_status_path: Path,
-    lifecycle_path: Path,
-    matches_path: Path,
-    alignment_path: Path,
-    output_path: Path,
-    *,
-    config: ReadinessConfig | None = None,
-) -> dict[str, object]:
-    config = config or ReadinessConfig()
-    all_records = load_collector_runs(Path(run_history_root))
-    public = [record for record in all_records if record.collector == "public"]
-    private = [record for record in all_records if record.collector == "private"]
-    overlap_start: datetime | None = None
-    overlap_end: datetime | None = None
-    if public and private:
-        overlap_start = max(_instant(public[0].started_at), _instant(private[0].started_at))
-        overlap_end = min(_instant(public[-1].finished_at), _instant(private[-1].finished_at))
-        if overlap_end < overlap_start:
-            overlap_start = overlap_end = None
-
-    if overlap_start is not None and overlap_end is not None:
-        exact_hours = (overlap_end - overlap_start).total_seconds() / 3600
-        public_window = _records_in_buckets(public, overlap_start, overlap_end, 60)
-        private_window = _records_in_buckets(private, overlap_start, overlap_end, 5)
-        public_slot_coverage = _coverage(public_window, overlap_start, overlap_end, 60)
-        private_slot_coverage = _coverage(private_window, overlap_start, overlap_end, 5)
-        public_hourly_coverage = _coverage(public_window, overlap_start, overlap_end, 60, success_only=True)
-        private_hourly_coverage = _coverage(private_window, overlap_start, overlap_end, 60, success_only=True)
-    else:
-        exact_hours = public_slot_coverage = private_slot_coverage = 0.0
-        public_hourly_coverage = private_hourly_coverage = 0.0
-        public_window = []
-        private_window = []
-
-    public_success_rate = _success_rate(public_window)
-    private_success_rate = _success_rate(private_window)
-    if overlap_start is not None and overlap_end is not None:
-        public_gap = _max_success_gap(public_window, overlap_start, overlap_end)
-        private_gap = _max_success_gap(private_window, overlap_start, overlap_end)
-    else:
-        public_gap = private_gap = math.inf
-
-    latest_status: dict[str, object] = {}
-    if Path(private_status_path).exists():
-        latest_status = json.loads(Path(private_status_path).read_text(encoding="utf-8"))
-    latest_private_finished_at = (
-        max(_instant(record.finished_at) for record in private) if private else None
-    )
-    status_finished_at: datetime | None = None
-    status_finished_value = latest_status.get("finished_at")
-    if isinstance(status_finished_value, str):
+def _strategy_observations(path: Path) -> list[int]:
+    rows = _read_rows(path)
+    observations: list[int] = []
+    for number, row in enumerate(rows, start=2):
+        if not row.get("strategy_id") or row.get("observations") is None:
+            raise ValueError(f"invalid strategy coverage row {number}: expected strategy_id,observations")
         try:
-            status_finished_at = _instant(status_finished_value)
+            value = int(row["observations"])
+        except ValueError as error:
+            raise ValueError(f"invalid strategy coverage row {number}: observations must be an integer") from error
+        if value < 0:
+            raise ValueError(f"invalid strategy coverage row {number}: observations must be nonnegative")
+        observations.append(value)
+    return observations
+
+
+def _private_diagnostics(
+    private: list[CollectorRunRecord], public_start: datetime | None, public_end: datetime | None,
+    private_status_path: Path, lifecycle_path: Path, matches_path: Path, alignment_path: Path,
+    config: ReadinessConfig,
+) -> dict[str, object]:
+    latest_status: dict[str, object] = {}
+    if private_status_path.exists():
+        latest_status = json.loads(private_status_path.read_text(encoding="utf-8"))
+    latest_private_finished_at = max((_instant(record.finished_at) for record in private), default=None)
+    status_finished_at: datetime | None = None
+    if isinstance(latest_status.get("finished_at"), str):
+        try:
+            status_finished_at = _instant(latest_status["finished_at"])
         except ValueError:
             pass
-    latest_private_status_gap_minutes: float | None = None
-    if status_finished_at is not None and latest_private_finished_at is not None:
-        latest_private_status_gap_minutes = abs(
-            (status_finished_at - latest_private_finished_at).total_seconds() / 60
-        )
-    latest_private_status_aligned = (
-        latest_private_status_gap_minutes is not None
-        and latest_private_status_gap_minutes <= config.max_private_gap_minutes
+    status_gap = (
+        abs((status_finished_at - latest_private_finished_at).total_seconds() / 60)
+        if status_finished_at is not None and latest_private_finished_at is not None else None
     )
-    latest_private_ok = (
-        latest_status.get("status") == "success"
-        and not latest_status.get("failures")
-        and latest_private_status_aligned
-    )
-
-    lifecycle = _read_rows(Path(lifecycle_path))
+    status_aligned = status_gap is not None and status_gap <= config.max_private_gap_minutes
+    status_ok = latest_status.get("status") == "success" and not latest_status.get("failures") and status_aligned
+    lifecycle, matches, alignment = _read_rows(lifecycle_path), _read_rows(matches_path), _read_rows(alignment_path)
     unique_offers = len({row.get("offer_id", "") for row in lifecycle if row.get("offer_id", "")})
     executed = sum(row.get("outcome") == "executed" for row in lifecycle)
     canceled = sum(row.get("outcome") == "canceled" for row in lifecycle)
-    matches = _read_rows(Path(matches_path))
-    matched_trades = sum(
-        int(row.get("matched_trade_count", "0") or 0)
-        for row in matches
-        if row.get("match_status") == "matched"
-    )
-
-    alignment = _read_rows(Path(alignment_path))
-    if overlap_start is not None and overlap_end is not None:
-        aligned_window = [
-            row
-            for row in alignment
-            if row.get("collected_at")
-            and overlap_start <= _instant(row["collected_at"]) <= overlap_end
-        ]
+    matched_trades = sum(int(row.get("matched_trade_count", "0") or 0) for row in matches if row.get("match_status") == "matched")
+    if public_start is not None and public_end is not None:
+        aligned = [row for row in alignment if row.get("collected_at") and public_start <= _instant(row["collected_at"]) <= public_end]
     else:
-        aligned_window = []
-    alignment_rate = (
-        sum(row.get("market_matched") in {"1", "true", "True"} for row in aligned_window)
-        / len(aligned_window)
-        if aligned_window
-        else 0.0
-    )
-
+        aligned = []
+    alignment_rate = sum(row.get("market_matched") in {"1", "true", "True"} for row in aligned) / len(aligned) if aligned else 0.0
     checks = {
-        "exact_history_duration": exact_hours >= config.min_exact_hours,
-        "public_slot_coverage": public_slot_coverage >= config.min_slot_coverage,
-        "private_slot_coverage": private_slot_coverage >= config.min_slot_coverage,
-        "public_hourly_coverage": public_hourly_coverage >= config.min_hourly_coverage,
-        "private_hourly_coverage": private_hourly_coverage >= config.min_hourly_coverage,
-        "public_success_rate": public_success_rate >= config.min_success_rate,
-        "private_success_rate": private_success_rate >= config.min_success_rate,
-        "public_max_gap": bool(public_window) and public_gap <= config.max_public_gap_minutes,
-        "private_max_gap": bool(private_window) and private_gap <= config.max_private_gap_minutes,
-        "latest_private_status": latest_private_ok,
-        "unique_offers": unique_offers >= config.min_offers,
-        "executed_offers": executed >= config.min_executed,
-        "canceled_offers": canceled >= config.min_canceled,
+        "latest_private_status": status_ok, "unique_offers": unique_offers >= config.min_offers,
+        "executed_offers": executed >= config.min_executed, "canceled_offers": canceled >= config.min_canceled,
         "matched_trades": matched_trades >= config.min_matched_trades,
         "market_alignment": alignment_rate >= config.min_alignment_rate,
     }
-    reasons = [name for name, passed in checks.items() if not passed]
-    metrics: dict[str, object] = {
-        "exact_overlap_start": overlap_start.isoformat() if overlap_start else "",
-        "exact_overlap_end": overlap_end.isoformat() if overlap_end else "",
-        "exact_overlap_hours": round(exact_hours, 6),
-        "public_exact_runs": len(public_window),
-        "private_exact_runs": len(private_window),
-        "public_slot_coverage": round(public_slot_coverage, 6),
-        "private_slot_coverage": round(private_slot_coverage, 6),
-        "public_hourly_coverage": round(public_hourly_coverage, 6),
-        "private_hourly_coverage": round(private_hourly_coverage, 6),
-        "public_success_rate": round(public_success_rate, 6),
-        "private_success_rate": round(private_success_rate, 6),
-        "public_failure_rate": round(1 - public_success_rate, 6),
-        "private_failure_rate": round(1 - private_success_rate, 6),
-        "public_max_success_gap_minutes": round(public_gap, 6),
-        "private_max_success_gap_minutes": round(private_gap, 6),
-        "latest_private_run_finished_at": (
-            latest_private_finished_at.isoformat() if latest_private_finished_at else ""
-        ),
-        "latest_private_status_finished_at": (
-            status_finished_at.isoformat() if status_finished_at else ""
-        ),
-        "latest_private_status_gap_minutes": (
-            round(latest_private_status_gap_minutes, 6)
-            if latest_private_status_gap_minutes is not None
-            else ""
-        ),
-        "latest_private_status_aligned": latest_private_status_aligned,
-        "unique_offers": unique_offers,
-        "executed_offers": executed,
-        "canceled_offers": canceled,
-        "matched_trades": matched_trades,
-        "alignment_observations": len(aligned_window),
+    return {"checks": checks, "metrics": {
+        "latest_private_run_finished_at": latest_private_finished_at.isoformat() if latest_private_finished_at else "",
+        "latest_private_status_finished_at": status_finished_at.isoformat() if status_finished_at else "",
+        "latest_private_status_gap_minutes": round(status_gap, 6) if status_gap is not None else "",
+        "latest_private_status_aligned": status_aligned, "latest_private_status": latest_status.get("status", "missing"),
+        "unique_offers": unique_offers, "executed_offers": executed, "canceled_offers": canceled,
+        "matched_trades": matched_trades, "alignment_observations": len(aligned),
         "market_alignment_rate": round(alignment_rate, 6),
-        "latest_private_status": latest_status.get("status", "missing"),
+    }}
+
+
+def evaluate_p0_readiness(
+    run_history_root: Path, private_status_path: Path, lifecycle_path: Path, matches_path: Path,
+    alignment_path: Path, output_path: Path, *, config: ReadinessConfig | None = None,
+    strategy_coverage_path: Path | None = None,
+) -> dict[str, object]:
+    config = config or ReadinessConfig()
+    public = sorted((item for item in load_collector_runs(Path(run_history_root)) if item.collector == "public"), key=lambda item: _instant(item.started_at))
+    private = sorted((item for item in load_collector_runs(Path(run_history_root)) if item.collector == "private"), key=lambda item: _instant(item.started_at))
+    if public:
+        public_start, public_end = _instant(public[0].started_at), max(_instant(item.finished_at) for item in public)
+        public_hours = (public_end - public_start).total_seconds() / 3600
+        public_hourly_coverage = _coverage(public, public_start, public_end, success_only=True)
+        public_gap = _max_success_gap(public, public_start, public_end)
+    else:
+        public_start = public_end = None
+        public_hours, public_hourly_coverage, public_gap = 0.0, 0.0, math.inf
+    coverage_rows = _strategy_observations(Path(strategy_coverage_path) if strategy_coverage_path is not None else Path("data/modeling/p0_strategy/strategy_coverage.csv"))
+    checks = {
+        "public_history_duration": public_hours >= config.min_public_hours,
+        "public_hourly_coverage": public_hourly_coverage >= config.min_hourly_coverage,
+        "public_max_gap": bool(public) and public_gap <= config.max_public_gap_minutes,
+        "strategy_observations": bool(coverage_rows) and all(value >= config.min_strategy_observations for value in coverage_rows),
     }
+    reasons = [name for name, passed in checks.items() if not passed]
+    diagnostics = _private_diagnostics(private, public_start, public_end, Path(private_status_path), Path(lifecycle_path), Path(matches_path), Path(alignment_path), config)
+    diagnostics["metrics"].update({
+        "public_runs": len(public), "public_max_success_gap_minutes": round(public_gap, 6),
+        "public_success_rate": round(sum(item.status == "success" for item in public) / len(public), 6) if public else 0.0,
+    })
     result: dict[str, object] = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "status": "ready" if not reasons else "not_ready",
-        "quality": "exact_run_history",
-        "metrics": metrics,
-        "checks": checks,
-        "thresholds": asdict(config),
-        "reasons": reasons,
+        "generated_at": datetime.now(timezone.utc).isoformat(), "status": "ready" if not reasons else "not_ready",
+        "quality": "public_market_history", "metrics": {
+            "public_history_start": public_start.isoformat() if public_start else "",
+            "public_history_end": public_end.isoformat() if public_end else "",
+            "public_history_hours": round(public_hours, 6), "public_hourly_coverage": round(public_hourly_coverage, 6),
+            "public_max_success_gap_minutes": round(public_gap, 6), "strategy_coverage_rows": len(coverage_rows),
+            "strategy_min_observations": min(coverage_rows) if coverage_rows else 0,
+        }, "checks": checks, "diagnostics": diagnostics, "thresholds": asdict(config), "reasons": reasons,
     }
-    output_path = Path(output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = output_path.with_suffix(output_path.suffix + ".tmp")
-    temporary.write_text(
-        json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-    temporary.replace(output_path)
+    output = Path(output_path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    temporary = output.with_suffix(output.suffix + ".tmp")
+    temporary.write_text(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    temporary.replace(output)
     return result
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Evaluate P0 exact data readiness without running a backtest")
+    parser = argparse.ArgumentParser(description="Evaluate P0 public-data readiness without running a backtest")
     parser.add_argument("--run-history-root", type=Path, default=Path("data/metadata/collector_runs"))
     parser.add_argument("--private-status", type=Path, default=Path("data/metadata/account_collector_status.json"))
     parser.add_argument("--lifecycle", type=Path, default=Path("data/modeling/p0_offer_lifecycle.csv"))
     parser.add_argument("--matches", type=Path, default=Path("data/modeling/p0_offer_trade_matches.csv"))
     parser.add_argument("--alignment", type=Path, default=Path("data/modeling/p0_aligned_private_market.csv"))
+    parser.add_argument("--strategy-coverage", type=Path, default=Path("data/modeling/p0_strategy/strategy_coverage.csv"))
     parser.add_argument("--output", type=Path, default=Path("data/metadata/p0_data_readiness.json"))
     args = parser.parse_args()
-    result = evaluate_p0_readiness(
-        args.run_history_root,
-        args.private_status,
-        args.lifecycle,
-        args.matches,
-        args.alignment,
-        args.output,
-    )
+    result = evaluate_p0_readiness(args.run_history_root, args.private_status, args.lifecycle, args.matches, args.alignment, args.output, strategy_coverage_path=args.strategy_coverage)
     print(json.dumps({"status": result["status"], "reasons": result["reasons"]}, ensure_ascii=False))
     return 0
 

@@ -72,4 +72,3 @@ def test_interest_and_billing_reject_invalid_duration(seconds: object) -> None:
         gross_interest(Decimal("1000"), Decimal("0.0002"), seconds)
     with pytest.raises(EconomicsError):
         billable_seconds(seconds)
-

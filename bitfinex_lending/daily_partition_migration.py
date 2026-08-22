@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import argparse
 import csv
+import ctypes
 import hashlib
 import json
+import os
 import shutil
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -64,18 +66,35 @@ def _legacy_files(data_root: Path) -> list[Path]:
     return sorted((path for path in files if path.exists()), key=lambda path: path.as_posix())
 
 
+def _move_without_replace(source: Path, destination: Path) -> None:
+    """Atomically move a file while refusing to replace an existing destination."""
+    if os.name == "nt":
+        move_file_ex = ctypes.WinDLL("kernel32", use_last_error=True).MoveFileExW
+        move_file_ex.argtypes = (ctypes.c_wchar_p, ctypes.c_wchar_p, ctypes.c_uint)
+        move_file_ex.restype = ctypes.c_bool
+        if move_file_ex(str(source), str(destination), 0x00000008):
+            return
+        error = ctypes.get_last_error()
+        if error in (80, 183):
+            raise FileExistsError(error, ctypes.FormatError(error), str(destination))
+        raise OSError(error, ctypes.FormatError(error), str(destination))
+
+    os.link(source, destination)
+    try:
+        source.unlink()
+    except OSError:
+        # The hard link leaves both names intact, which is safer than deleting either file.
+        raise
+
+
 def _rollback_staged_files(moved: list[tuple[Path, Path]]) -> list[str]:
     failures: list[str] = []
     for source, destination in reversed(moved):
-        if not destination.exists():
-            failures.append(f"staged file is missing during rollback: {destination}")
-            continue
-        if source.exists():
-            failures.append(f"refusing to overwrite source during rollback: {source}")
-            continue
         try:
             source.parent.mkdir(parents=True, exist_ok=True)
-            destination.replace(source)
+            _move_without_replace(destination, source)
+        except FileExistsError:
+            failures.append(f"refusing to overwrite source during rollback: {source}")
         except OSError as exc:
             failures.append(f"cannot restore {source} from {destination}: {exc}")
     return failures
@@ -305,8 +324,10 @@ def recover_staged_files(backup_root: Path, data_root: Path) -> int:
     for source, staged in to_restore:
         try:
             source.parent.mkdir(parents=True, exist_ok=True)
-            staged.replace(source)
+            _move_without_replace(staged, source)
             restored += 1
+        except FileExistsError:
+            raise MigrationError(f"refusing to overwrite source during recovery: {source}") from None
         except OSError as exc:
             raise MigrationError(f"cannot restore {source} from {staged}: {exc}") from exc
     manifest_path.unlink(missing_ok=True)

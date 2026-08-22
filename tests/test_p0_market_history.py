@@ -73,6 +73,30 @@ def test_rejects_unpaired_future_or_stale_required_public_snapshots(tmp_path: Pa
         load_market_hours(tmp_path / "market", tmp_path / "raw", "fUST")
 
 
+def test_rejects_required_pairing_that_is_91_minutes_old(tmp_path: Path) -> None:
+    _public_fixture(tmp_path / "market", tmp_path / "raw")
+    candle_path = tmp_path / "market" / "funding_candles" / "2026" / "08" / "01" / "fUST.csv"
+    candle = _market_row(collected_at="2026-07-31T23:29:00+00:00")
+    candle.update({"high": "0.0004", "volume": "1200"})
+    _write(candle_path, ("collected_at", "market", "high", "volume"), [candle])
+
+    with pytest.raises(MarketHistoryError, match="candle"):
+        load_market_hours(tmp_path / "market", tmp_path / "raw", "fUST")
+
+
+def test_keeps_all_offer_raw_snapshot_as_zero_visible_demand(tmp_path: Path) -> None:
+    _public_fixture(tmp_path / "market", tmp_path / "raw")
+    _write(
+        tmp_path / "raw" / "2026" / "08" / "01" / "fUST.csv",
+        ("run_id", "market", "rate", "period", "count", "amount", "side", "fetched_at"),
+        [{"run_id": "offers-only", "market": "fUST", "rate": "0.0004", "period": "2", "count": "1", "amount": "7", "side": "offer", "fetched_at": "2026-08-01T00:45:00+00:00"}],
+    )
+
+    rows = load_market_hours(tmp_path / "market", tmp_path / "raw", "fUST")
+
+    assert rows[0].visible_demand_amount == 0.0
+
+
 @pytest.mark.parametrize(
     ("path", "field", "value", "message"),
     [

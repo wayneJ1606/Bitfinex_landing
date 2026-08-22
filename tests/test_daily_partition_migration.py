@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import json
 from pathlib import Path
 
 import pytest
@@ -156,6 +157,47 @@ def test_stage_rolls_back_every_source_when_manifest_write_fails(
     )
 
 
+def test_stage_rolls_back_every_source_when_final_manifest_replace_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    data = tmp_path / "data"
+    backup = data / "archive" / "daily-partition-test"
+    first_source = data / "account" / "funding_offers.csv"
+    second_source = data / "account" / "funding_trades.csv"
+    row = ("1", "2026-08-16T12:00:00Z", "1", "/private", "v1", "[]")
+    _write(first_source, ACCOUNT_HEADER, [row])
+    _write(second_source, ACCOUNT_HEADER, [row])
+
+    original_replace = Path.replace
+    finalizations = 0
+
+    def fail_final_manifest_replace(source: Path, destination: Path) -> Path:
+        nonlocal finalizations
+        if source == backup / "manifest.json.staging" and destination == backup / "manifest.json":
+            finalizations += 1
+            if finalizations == 2:
+                raise OSError("injected final manifest replace failure")
+        return original_replace(source, destination)
+
+    monkeypatch.setattr(Path, "replace", fail_final_manifest_replace)
+
+    with pytest.raises(MigrationError, match="injected final manifest replace failure"):
+        migration.stage_legacy_files(data, backup)
+
+    assert first_source.exists()
+    assert second_source.exists()
+    assert not (backup / "account" / "funding_offers.csv").exists()
+    assert not (backup / "account" / "funding_trades.csv").exists()
+    assert not (backup / "manifest.json.staging").exists()
+    assert not (backup / "manifest.json").exists()
+
+    monkeypatch.setattr(Path, "replace", original_replace)
+    assert stage_legacy_files(data, backup) == (
+        backup / "account" / "funding_offers.csv",
+        backup / "account" / "funding_trades.csv",
+    )
+
+
 def test_stage_refuses_to_overwrite_a_source_created_during_rollback(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -166,6 +208,8 @@ def test_stage_refuses_to_overwrite_a_source_created_during_rollback(
     row = ("1", "2026-08-16T12:00:00Z", "1", "/private", "v1", "[]")
     _write(first_source, ACCOUNT_HEADER, [row])
     _write(second_source, ACCOUNT_HEADER, [row])
+    recover = getattr(migration, "recover_staged_files", None)
+    assert callable(recover), "recovery operation is missing"
 
     original_replace = Path.replace
 
@@ -184,4 +228,28 @@ def test_stage_refuses_to_overwrite_a_source_created_during_rollback(
     assert first_source.read_text(encoding="utf-8").count("unrelated") == 1
     assert second_source.exists()
     assert (backup / "account" / "funding_offers.csv").exists()
+    assert not (backup / "manifest.json.staging").exists()
+    recovery_manifest = json.loads((backup / "manifest.json").read_text(encoding="utf-8"))
+    assert recovery_manifest["state"] == "recovery_required"
+    assert [entry["relative_path"] for entry in recovery_manifest["entries"]] == [
+        "account/funding_offers.csv",
+        "account/funding_trades.csv",
+    ]
+
+    with pytest.raises(MigrationError, match="recovery is required"):
+        verify_staged_migration(backup, data)
+    with pytest.raises(MigrationError, match="refusing to overwrite source during recovery"):
+        recover(backup, data)
+    assert first_source.read_text(encoding="utf-8").count("unrelated") == 1
+
+    monkeypatch.setattr(Path, "replace", original_replace)
+    quarantine = tmp_path / "unrelated-source.csv"
+    first_source.replace(quarantine)
+    assert recover(backup, data) == 1
+    assert first_source.read_text(encoding="utf-8").count("unrelated") == 0
+    assert not (backup / "account" / "funding_offers.csv").exists()
     assert not (backup / "manifest.json").exists()
+    assert stage_legacy_files(data, backup) == (
+        backup / "account" / "funding_offers.csv",
+        backup / "account" / "funding_trades.csv",
+    )

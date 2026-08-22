@@ -81,6 +81,15 @@ def _rollback_staged_files(moved: list[tuple[Path, Path]]) -> list[str]:
     return failures
 
 
+def _manifest_entry(source: Path, data_root: Path) -> dict[str, object]:
+    _, rows = _rows(source)
+    return {
+        "relative_path": source.relative_to(data_root).as_posix(),
+        "rows": len(rows),
+        "sha256": _sha256(source),
+    }
+
+
 def stage_legacy_files(data_root: Path, backup_root: Path) -> tuple[Path, ...]:
     data_root = Path(data_root).resolve()
     backup_root = Path(backup_root).resolve()
@@ -98,18 +107,22 @@ def stage_legacy_files(data_root: Path, backup_root: Path) -> tuple[Path, ...]:
     if manifest_path.exists() or temporary_manifest.exists():
         raise MigrationError("backup directory already contains a staging manifest")
 
-    manifest: list[dict[str, object]] = []
+    manifest = [_manifest_entry(source, data_root) for source in sources]
     moved: list[tuple[Path, Path]] = []
     try:
-        for source, destination in zip(sources, destinations, strict=True):
-            _, rows = _rows(source)
-            manifest.append(
-                {
-                    "relative_path": source.relative_to(data_root).as_posix(),
-                    "rows": len(rows),
-                    "sha256": _sha256(source),
-                }
+        backup_root.mkdir(parents=True, exist_ok=True)
+        temporary_manifest.write_text(
+            json.dumps(
+                {"state": "recovery_required", "entries": manifest},
+                ensure_ascii=False,
+                indent=2,
+                sort_keys=True,
             )
+            + "\n",
+            encoding="utf-8",
+        )
+        temporary_manifest.replace(manifest_path)
+        for source, destination in zip(sources, destinations, strict=True):
             destination.parent.mkdir(parents=True, exist_ok=True)
             source.replace(destination)
             moved.append((source, destination))
@@ -123,7 +136,10 @@ def stage_legacy_files(data_root: Path, backup_root: Path) -> tuple[Path, ...]:
         temporary_manifest.unlink(missing_ok=True)
         if rollback_failures:
             detail = "; ".join(rollback_failures)
-            raise MigrationError(f"staging failed ({exc}); rollback incomplete: {detail}") from exc
+            raise MigrationError(
+                f"staging failed ({exc}); rollback incomplete; recovery manifest retained: {detail}"
+            ) from exc
+        manifest_path.unlink(missing_ok=True)
         raise MigrationError(f"cannot stage legacy CSV files: {exc}") from exc
     return tuple(destinations)
 
@@ -213,11 +229,23 @@ def migrate_staged_files(backup_root: Path, data_root: Path) -> MigrationSummary
     return MigrationSummary(source_rows, inserted_rows, duplicate_rows, len(outputs))
 
 
-def _verify_manifest(backup_root: Path) -> None:
+def _manifest_entries(backup_root: Path) -> list[dict[str, object]]:
     manifest_path = backup_root / "manifest.json"
     if not manifest_path.exists():
         raise MigrationError("backup manifest is missing")
-    entries = json.loads(manifest_path.read_text(encoding="utf-8"))
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise MigrationError(f"backup manifest is unreadable: {exc}") from exc
+    if isinstance(manifest, dict) and manifest.get("state") == "recovery_required":
+        raise MigrationError("staging recovery is required; run recover_staged_files")
+    if not isinstance(manifest, list):
+        raise MigrationError("backup manifest has an unsupported schema")
+    return manifest
+
+
+def _verify_manifest(backup_root: Path) -> None:
+    entries = _manifest_entries(backup_root)
     for entry in entries:
         path = backup_root / str(entry["relative_path"])
         if not path.exists() or _sha256(path) != entry["sha256"]:
@@ -225,6 +253,63 @@ def _verify_manifest(backup_root: Path) -> None:
         _, rows = _rows(path)
         if len(rows) != int(entry["rows"]):
             raise MigrationError(f"backup row count mismatch: {path}")
+
+
+def recover_staged_files(backup_root: Path, data_root: Path) -> int:
+    backup_root = Path(backup_root).resolve()
+    data_root = Path(data_root).resolve()
+    archive_root = (data_root / "archive").resolve()
+    if not backup_root.is_relative_to(archive_root) or backup_root == archive_root:
+        raise MigrationError("recovery backup must be a dedicated directory under data/archive")
+    manifest_path = backup_root / "manifest.json"
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise MigrationError(f"recovery manifest is unreadable: {exc}") from exc
+    if not isinstance(manifest, dict) or manifest.get("state") != "recovery_required":
+        raise MigrationError("backup does not contain a recovery manifest")
+    entries = manifest.get("entries")
+    if not isinstance(entries, list):
+        raise MigrationError("recovery manifest entries are missing")
+
+    to_restore: list[tuple[Path, Path]] = []
+    failures: list[str] = []
+    for entry in entries:
+        if not isinstance(entry, dict) or "relative_path" not in entry:
+            failures.append("recovery manifest contains an invalid entry")
+            continue
+        source = data_root / str(entry["relative_path"])
+        staged = backup_root / str(entry["relative_path"])
+        if staged.exists():
+            if _sha256(staged) != entry.get("sha256"):
+                failures.append(f"recovery hash mismatch: {staged}")
+                continue
+            _, rows = _rows(staged)
+            if len(rows) != int(entry.get("rows", -1)):
+                failures.append(f"recovery row count mismatch: {staged}")
+                continue
+            if source.exists():
+                failures.append(f"refusing to overwrite source during recovery: {source}")
+                continue
+            to_restore.append((source, staged))
+        elif source.exists():
+            if _sha256(source) != entry.get("sha256"):
+                failures.append(f"recovery source hash mismatch: {source}")
+        else:
+            failures.append(f"recovery file is missing: {source}")
+    if failures:
+        raise MigrationError("; ".join(failures))
+
+    restored = 0
+    for source, staged in to_restore:
+        try:
+            source.parent.mkdir(parents=True, exist_ok=True)
+            staged.replace(source)
+            restored += 1
+        except OSError as exc:
+            raise MigrationError(f"cannot restore {source} from {staged}: {exc}") from exc
+    manifest_path.unlink(missing_ok=True)
+    return restored
 
 
 def verify_staged_migration(backup_root: Path, data_root: Path) -> int:

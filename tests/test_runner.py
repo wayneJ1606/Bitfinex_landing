@@ -78,6 +78,7 @@ def test_run_collection_continues_after_failure_and_summarizes_results() -> None
     client = FakeClient(
         {
             "fUSD": [[0.0002, 2, 1, 10.0]],
+            "fUST": [[0.00025, 2, 1, 8.0]],
             "fBTC": ClientError("network_error", "request timed out"),
             "fETH": [[0.0003, 7, 2, -5.0]],
         }
@@ -94,16 +95,18 @@ def test_run_collection_continues_after_failure_and_summarizes_results() -> None
         clock=TickingClock(),
     )
 
-    assert client.markets == ["fUSD", "fBTC", "fETH"]
-    assert exporter.markets == ["fUSD", "fETH"]
+    assert client.markets == ["fUSD", "fUST", "fBTC", "fETH"]
+    assert client.markets.count("fUST") == 1
+    assert exporter.markets == ["fUSD", "fUST", "fETH"]
     assert summary.run_id == "run-1"
     assert summary.exit_code == 1
     assert [result.status for result in summary.results] == [
         "success",
+        "success",
         "failed",
         "success",
     ]
-    assert storage.events[1][:4] == (
+    assert storage.events[2][:4] == (
         "failed",
         "fBTC",
         "network_error",
@@ -112,7 +115,7 @@ def test_run_collection_continues_after_failure_and_summarizes_results() -> None
 
 
 def test_run_collection_records_empty_as_successful_warning() -> None:
-    client = FakeClient({"fUSD": [], "fBTC": [], "fETH": []})
+    client = FakeClient({"fUSD": [], "fUST": [], "fBTC": [], "fETH": []})
     storage = FakeStorage()
     exporter = FakeExporter()
 
@@ -126,8 +129,15 @@ def test_run_collection_records_empty_as_successful_warning() -> None:
     )
 
     assert summary.exit_code == 0
-    assert summary.warning_count == 3
-    assert [event[0] for event in storage.events] == ["empty", "empty", "empty"]
+    assert summary.warning_count == 4
+    assert client.markets == ["fUSD", "fUST", "fBTC", "fETH"]
+    assert client.markets.count("fUST") == 1
+    assert [event[0] for event in storage.events] == [
+        "empty",
+        "empty",
+        "empty",
+        "empty",
+    ]
     assert exporter.markets == []
 
 
@@ -150,4 +160,3 @@ def test_run_collection_uses_one_run_id_and_timezone_aware_utc_times() -> None:
     for event in storage.events:
         assert event[3].endswith("+00:00")
         assert event[4].endswith("+00:00")
-

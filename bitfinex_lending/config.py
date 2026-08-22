@@ -6,7 +6,7 @@ from pathlib import Path
 
 @dataclass(frozen=True)
 class Settings:
-    markets: tuple[str, ...] = ("fUSD", "fBTC", "fETH")
+    markets: tuple[str, ...] = ("fUSD", "fUST", "fBTC", "fETH")
     api_base_url: str = "https://api-pub.bitfinex.com/v2"
     precision: str = "P0"
     book_length: int = 25

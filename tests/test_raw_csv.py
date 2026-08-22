@@ -80,6 +80,19 @@ def test_loads_multiple_days_in_utc_order_and_deduplicates_exact_rows(
     assert rows[0].count == 1
 
 
+def test_writes_and_loads_fust_from_its_daily_market_path(tmp_path: Path) -> None:
+    root = tmp_path / "raw"
+    path = root / "2026/08/22/fUST.csv"
+    write_raw(path, [raw_row(run_id="run-fust", market="fUST")])
+
+    rows = load_raw_snapshots(root)
+
+    assert path.is_file()
+    assert len(rows) == 1
+    assert rows[0].run_id == "run-fust"
+    assert rows[0].market == "fUST"
+
+
 def test_missing_raw_root_returns_empty_tuple(tmp_path: Path) -> None:
     assert load_raw_snapshots(tmp_path / "missing") == ()
 

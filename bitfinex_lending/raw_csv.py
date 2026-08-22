@@ -19,7 +19,7 @@ RAW_FIELDS = (
     "side",
     "fetched_at",
 )
-SUPPORTED_MARKETS = frozenset({"fUSD", "fBTC", "fETH"})
+SUPPORTED_MARKETS = frozenset({"fUSD", "fUST", "fBTC", "fETH"})
 
 
 class RawCsvError(ValueError):

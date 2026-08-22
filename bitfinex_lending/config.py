@@ -15,4 +15,5 @@ class Settings:
     csv_directory: Path = Path("data/raw")
     market_directory: Path = Path("data/market")
     metadata_directory: Path = Path("data/metadata")
+    private_api_base_url: str = "https://api.bitfinex.com"
 

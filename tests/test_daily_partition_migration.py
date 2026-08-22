@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -94,24 +95,27 @@ def test_stage_rolls_back_every_source_when_the_nth_move_fails(
     _write(second_source, ACCOUNT_HEADER, [row])
 
     original_replace = Path.replace
-    moves = 0
+    source_moves = 0
 
     def fail_second_move(source: Path, destination: Path) -> Path:
-        nonlocal moves
-        moves += 1
-        if moves == 2:
-            raise OSError("injected second move failure")
+        nonlocal source_moves
+        if source in (first_source, second_source):
+            source_moves += 1
+            if source_moves == 2:
+                raise OSError("injected second source move failure")
         return original_replace(source, destination)
 
     monkeypatch.setattr(Path, "replace", fail_second_move)
 
-    with pytest.raises(MigrationError, match="injected second move failure"):
+    with pytest.raises(MigrationError, match="injected second source move failure"):
         migration.stage_legacy_files(data, backup)
 
+    assert source_moves == 2
     assert first_source.exists()
     assert second_source.exists()
     assert not (backup / "account" / "funding_offers.csv").exists()
     assert not (backup / "account" / "funding_trades.csv").exists()
+    assert not (backup / "manifest.json.staging").exists()
     assert not (backup / "manifest.json").exists()
 
     monkeypatch.setattr(Path, "replace", original_replace)
@@ -155,6 +159,84 @@ def test_stage_rolls_back_every_source_when_manifest_write_fails(
         backup / "account" / "funding_offers.csv",
         backup / "account" / "funding_trades.csv",
     )
+
+
+def test_stage_rolls_back_every_source_when_final_manifest_write_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    data = tmp_path / "data"
+    backup = data / "archive" / "daily-partition-test"
+    first_source = data / "account" / "funding_offers.csv"
+    second_source = data / "account" / "funding_trades.csv"
+    row = ("1", "2026-08-16T12:00:00Z", "1", "/private", "v1", "[]")
+    _write(first_source, ACCOUNT_HEADER, [row])
+    _write(second_source, ACCOUNT_HEADER, [row])
+
+    original_write_text = Path.write_text
+    manifest_writes = 0
+
+    def fail_final_manifest_write(path: Path, *args: object, **kwargs: object) -> int:
+        nonlocal manifest_writes
+        if path == backup / "manifest.json.staging":
+            manifest_writes += 1
+            if manifest_writes == 2:
+                raise OSError("injected final manifest write failure")
+        return original_write_text(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "write_text", fail_final_manifest_write)
+
+    with pytest.raises(MigrationError, match="injected final manifest write failure"):
+        migration.stage_legacy_files(data, backup)
+
+    assert manifest_writes == 2
+    assert first_source.exists()
+    assert second_source.exists()
+    assert not (backup / "account" / "funding_offers.csv").exists()
+    assert not (backup / "account" / "funding_trades.csv").exists()
+    assert not (backup / "manifest.json.staging").exists()
+    assert not (backup / "manifest.json").exists()
+
+    monkeypatch.setattr(Path, "write_text", original_write_text)
+    assert stage_legacy_files(data, backup) == (
+        backup / "account" / "funding_offers.csv",
+        backup / "account" / "funding_trades.csv",
+    )
+
+
+def test_migrate_and_cli_reject_recovery_manifest_without_creating_daily_output(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    data = tmp_path / "data"
+    backup = data / "archive" / "daily-partition-test"
+    staged = backup / "account" / "funding_offers.csv"
+    row = ("1", "2026-08-16T12:00:00Z", "1", "/private", "v1", "[]")
+    _write(staged, ACCOUNT_HEADER, [row])
+    (backup / "manifest.json").write_text(
+        json.dumps({"state": "recovery_required", "entries": []}), encoding="utf-8"
+    )
+    daily_output = data / "account" / "funding_offers" / "2026" / "08" / "16.csv"
+
+    with pytest.raises(MigrationError, match="recovery is required"):
+        migrate_staged_files(backup, data)
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "daily_partition_migration.py",
+            "migrate",
+            "--data-root",
+            str(data),
+            "--backup-root",
+            str(backup),
+        ],
+    )
+    with pytest.raises(MigrationError, match="recovery is required"):
+        migration.main()
+
+    assert staged.exists()
+    assert (backup / "manifest.json").exists()
+    assert not daily_output.exists()
 
 
 def test_stage_rolls_back_every_source_when_final_manifest_replace_fails(

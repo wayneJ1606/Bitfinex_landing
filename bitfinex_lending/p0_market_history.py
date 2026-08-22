@@ -131,6 +131,7 @@ def _raw_snapshots(raw_root: Path, api_symbol: str) -> tuple[tuple[datetime, flo
                     if key in seen:
                         continue
                     seen.add(key)
+                    demands.setdefault(timestamp, 0.0)
                     if side == "demand":
                         demands[timestamp] = demands.get(timestamp, 0.0) + abs(amount)
         except MarketHistoryError:

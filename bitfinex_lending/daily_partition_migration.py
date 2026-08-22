@@ -207,6 +207,7 @@ def _merge_rows(
 def migrate_staged_files(backup_root: Path, data_root: Path) -> MigrationSummary:
     backup_root = Path(backup_root)
     data_root = Path(data_root)
+    _manifest_entries(backup_root)
     source_rows = inserted_rows = duplicate_rows = 0
     outputs: set[Path] = set()
     for kind, name, source in _staged_files(backup_root):

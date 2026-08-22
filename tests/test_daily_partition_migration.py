@@ -335,3 +335,109 @@ def test_stage_refuses_to_overwrite_a_source_created_during_rollback(
         backup / "account" / "funding_offers.csv",
         backup / "account" / "funding_trades.csv",
     )
+
+
+def test_rollback_atomic_restore_refuses_destination_created_at_move_boundary(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    data = tmp_path / "data"
+    backup = data / "archive" / "daily-partition-test"
+    first_source = data / "account" / "funding_offers.csv"
+    second_source = data / "account" / "funding_trades.csv"
+    row = ("1", "2026-08-16T12:00:00Z", "1", "/private", "v1", "[]")
+    _write(first_source, ACCOUNT_HEADER, [row])
+    _write(second_source, ACCOUNT_HEADER, [row])
+    atomic_move = getattr(migration, "_move_without_replace", None)
+    assert callable(atomic_move), "atomic no-replace move helper is missing"
+
+    original_replace = Path.replace
+
+    def fail_second_source_move(source: Path, destination: Path) -> Path:
+        if source == second_source:
+            raise OSError("injected second source move failure")
+        return original_replace(source, destination)
+
+    def create_conflict_at_restore_boundary(source: Path, destination: Path) -> None:
+        if source == backup / "account" / "funding_offers.csv" and destination == first_source:
+            _write(first_source, ACCOUNT_HEADER, [("unrelated", *row[1:])])
+        atomic_move(source, destination)
+
+    monkeypatch.setattr(Path, "replace", fail_second_source_move)
+    monkeypatch.setattr(migration, "_move_without_replace", create_conflict_at_restore_boundary)
+
+    with pytest.raises(MigrationError, match="rollback incomplete"):
+        stage_legacy_files(data, backup)
+
+    assert first_source.read_text(encoding="utf-8").count("unrelated") == 1
+    assert second_source.exists()
+    assert (backup / "account" / "funding_offers.csv").exists()
+    assert not (backup / "manifest.json.staging").exists()
+    assert (backup / "manifest.json").exists()
+    with pytest.raises(MigrationError, match="recovery is required"):
+        verify_staged_migration(backup, data)
+
+    monkeypatch.setattr(migration, "_move_without_replace", atomic_move)
+    monkeypatch.setattr(Path, "replace", original_replace)
+    quarantine = tmp_path / "unrelated-source.csv"
+    first_source.replace(quarantine)
+    assert migration.recover_staged_files(backup, data) == 1
+    assert first_source.read_text(encoding="utf-8").count("unrelated") == 0
+    assert not (backup / "account" / "funding_offers.csv").exists()
+    assert not (backup / "manifest.json").exists()
+
+
+def test_recovery_atomic_restore_refuses_destination_created_at_move_boundary(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    data = tmp_path / "data"
+    backup = data / "archive" / "daily-partition-test"
+    first_source = data / "account" / "funding_offers.csv"
+    second_source = data / "account" / "funding_trades.csv"
+    staged_first = backup / "account" / "funding_offers.csv"
+    row = ("1", "2026-08-16T12:00:00Z", "1", "/private", "v1", "[]")
+    _write(staged_first, ACCOUNT_HEADER, [row])
+    _write(second_source, ACCOUNT_HEADER, [row])
+    (backup / "manifest.json").write_text(
+        json.dumps(
+            {
+                "state": "recovery_required",
+                "entries": [
+                    {
+                        "relative_path": "account/funding_offers.csv",
+                        "rows": 1,
+                        "sha256": migration._sha256(staged_first),
+                    },
+                    {
+                        "relative_path": "account/funding_trades.csv",
+                        "rows": 1,
+                        "sha256": migration._sha256(second_source),
+                    },
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    atomic_move = getattr(migration, "_move_without_replace", None)
+    assert callable(atomic_move), "atomic no-replace move helper is missing"
+
+    def create_conflict_at_restore_boundary(source: Path, destination: Path) -> None:
+        if source == staged_first and destination == first_source:
+            _write(first_source, ACCOUNT_HEADER, [("unrelated", *row[1:])])
+        atomic_move(source, destination)
+
+    monkeypatch.setattr(migration, "_move_without_replace", create_conflict_at_restore_boundary)
+
+    with pytest.raises(MigrationError, match="refusing to overwrite source during recovery"):
+        migration.recover_staged_files(backup, data)
+
+    assert first_source.read_text(encoding="utf-8").count("unrelated") == 1
+    assert staged_first.exists()
+    assert (backup / "manifest.json").exists()
+
+    monkeypatch.setattr(migration, "_move_without_replace", atomic_move)
+    quarantine = tmp_path / "unrelated-source.csv"
+    first_source.replace(quarantine)
+    assert migration.recover_staged_files(backup, data) == 1
+    assert first_source.read_text(encoding="utf-8").count("unrelated") == 0
+    assert not staged_first.exists()
+    assert not (backup / "manifest.json").exists()

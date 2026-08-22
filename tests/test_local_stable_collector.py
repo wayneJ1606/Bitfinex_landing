@@ -24,6 +24,15 @@ class FlakyClient:
         return [[0.0002, 2, 1, 10.0]]
 
 
+class RecordingClient:
+    def __init__(self) -> None:
+        self.markets: list[str] = []
+
+    def fetch_book(self, market: str) -> object:
+        self.markets.append(market)
+        return [[0.0002, 2, 1, 10.0]]
+
+
 class Storage:
     def __init__(self) -> None:
         self.successes: list[tuple[FundingBookRow, ...]] = []
@@ -86,6 +95,28 @@ def test_stable_collection_retries_transient_client_failure(tmp_path: Path) -> N
     assert client.calls == 2
     assert len(storage.successes) == 1
     assert storage.failures == []
+
+
+def test_default_collection_requests_fust_once_and_returns_its_result(tmp_path: Path) -> None:
+    client = RecordingClient()
+    summary = run_stable_collection(
+        Settings(
+            database_path=tmp_path / "collector.sqlite3",
+            csv_directory=tmp_path / "raw",
+        ),
+        client,
+        Storage(),
+        lambda rows, directory: directory / f"{rows[0].market}.csv",
+        uuid_factory=lambda: "run-fust",
+        clock=lambda: datetime(2026, 8, 22, tzinfo=timezone.utc),
+        sleeper=lambda seconds: None,
+        lock_path=tmp_path / "collector.lock",
+        log_path=tmp_path / "collector.log",
+    )
+
+    assert summary is not None
+    assert client.markets.count("fUST") == 1
+    assert next(result for result in summary.results if result.market == "fUST").status == "success"
 
 
 def test_stable_collection_skips_when_lock_is_held(tmp_path: Path) -> None:

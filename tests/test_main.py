@@ -22,6 +22,10 @@ class FakeStorage:
         self.initialized = True
 
 
+def test_default_settings_keep_usd_and_usdt_as_distinct_funding_markets() -> None:
+    assert Settings().markets == ("fUSD", "fUST", "fBTC", "fETH")
+
+
 def test_main_initializes_storage_creates_directories_and_prints_summary(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -36,6 +40,7 @@ def test_main_initializes_storage_creates_directories_and_prints_summary(
         run_id="run-1",
         results=(
             MarketResult("fUSD", "success", 2, "Fetched and stored 2 rows"),
+            MarketResult("fUST", "success", 1, "Fetched and stored 1 rows"),
             MarketResult("fBTC", "empty", 0, "Bitfinex returned an empty book"),
             MarketResult("fETH", "failed", 0, "request timed out"),
         ),
@@ -59,9 +64,10 @@ def test_main_initializes_storage_creates_directories_and_prints_summary(
     assert captured["exporter"] is append_daily_snapshot
     assert "run_id=run-1" in output.out
     assert "fUSD success rows=2" in output.out
+    assert "fUST success rows=1" in output.out
     assert "fBTC empty rows=0" in output.out
     assert "fETH failed rows=0" in output.out
-    assert "success=1 empty=1 failed=1" in output.out
+    assert "success=2 empty=1 failed=1" in output.out
     assert output.err == ""
 
 

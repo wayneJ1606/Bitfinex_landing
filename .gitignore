@@ -39,6 +39,12 @@ data/modeling/p0_offer_lifecycle.csv
 data/modeling/p0_offer_trade_matches.csv
 data/modeling/p0_fixed_baselines.csv
 
+# Local public-data synchronization runtime
+data/archive/
+data/metadata/public_git_sync_status.json
+data/local_public/**/*.tmp
+data/local_public/**/*.lock
+
 # Disposable test synchronization workspaces
 .test-tmp-sync-*/
 

@@ -7,10 +7,22 @@ import sys
 
 from bitfinex_lending.client import ClientError
 from bitfinex_lending.config import Settings
-from bitfinex_lending.local_stable_collector import _exclusive_lock, run_stable_collection
+from bitfinex_lending.local_stable_collector import (
+    _exclusive_lock,
+    local_public_settings,
+    run_stable_collection,
+)
 from bitfinex_lending.market_collector import FUNDING_MARKETS
 from bitfinex_lending.models import FundingBookRow
 from bitfinex_lending.collector_run_history import load_collector_runs
+
+
+def test_local_collector_uses_source_specific_public_roots() -> None:
+    settings = local_public_settings()
+
+    assert settings.csv_directory == Path("data/local_public/raw")
+    assert settings.market_directory == Path("data/local_public/market")
+    assert settings.metadata_directory == Path("data/metadata")
 
 
 class FlakyClient:

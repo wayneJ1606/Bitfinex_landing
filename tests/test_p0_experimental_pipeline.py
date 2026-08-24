@@ -3,7 +3,9 @@ from __future__ import annotations
 import csv
 import json
 from pathlib import Path
+import sys
 
+import bitfinex_lending.p0_experimental_pipeline as pipeline
 from bitfinex_lending.p0_experimental_pipeline import run_experimental_pipeline
 
 
@@ -44,3 +46,21 @@ def test_pipeline_publishes_canonical_json_and_dashboard_without_private_inputs(
     assert payload["scenarios"]
     assert "1001.7" in summary.dashboard_path.read_text(encoding="utf-8")
     assert not list(output.glob("*.tmp"))
+
+
+def test_cli_defaults_to_source_separated_local_market_data(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_run(**kwargs: object) -> pipeline.ExperimentalPipelineSummary:
+        captured.update(kwargs)
+        return pipeline.ExperimentalPipelineSummary(
+            status="experimental",
+            json_path=Path("dashboard_data.json"),
+            dashboard_path=Path("dashboard.html"),
+        )
+
+    monkeypatch.setattr(pipeline, "run_experimental_pipeline", fake_run)
+    monkeypatch.setattr(sys, "argv", ["p0_experimental_pipeline"])
+
+    assert pipeline.main() == 0
+    assert captured["market_root"] == Path("data/local_public/market")

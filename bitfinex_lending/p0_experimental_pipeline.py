@@ -55,7 +55,9 @@ def main() -> int:
         description="Generate the local read-only experimental funding dashboard"
     )
     parser.add_argument("--modeling-root", type=Path, default=Path("data/modeling"))
-    parser.add_argument("--market-root", type=Path, default=Path("data/market"))
+    parser.add_argument(
+        "--market-root", type=Path, default=Path("data/local_public/market")
+    )
     parser.add_argument(
         "--output-root",
         type=Path,

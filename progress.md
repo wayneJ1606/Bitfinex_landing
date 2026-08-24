@@ -1,5 +1,148 @@
 # Bitfinex 放貸市場決策輔助系統進度紀錄
 
+## 2026-08-24 實驗模型與 Dashboard 暫停檢查點
+
+- `fUST` 已納入本機 funding-book 收集與原始 CSV 寫入；USD 與 USDT 仍視為不同市場，不以 `fUSD` 取代 `fUST` 的市場行為。
+- 已完成目前可操作的實驗模型與本機唯讀 Dashboard，可比較本金、預設借出天數及市場預期結果；公開市場成交代理固定標示為「非常低可信度實驗值」，不可視為真實成交機率或投資建議。
+- 已修正同一市場不同執行批次可能混用評估與預測的問題，並補充提前還款可能使實際利息低於完整期限估算的限制。
+- 已建立 Git 安全檢查點：commit `14c5afa`（`feat: add experimental funding dashboard`），僅包含 10 個實驗模型／Dashboard 程式及測試檔；完整離線測試為 `284 passed, 1 deselected`，私人資料、`data/` 與其他未整理變更未納入提交。
+- 目前介面方向已獲使用者接受，但正式 P0 尚未完成官方收益規則、歷史成交統計、資金配置、walk-forward 基準比較、正式多格式輸出及每日分析排程。
+- 結案報告可先採用實驗結果，前提是明確揭露資料量及成交代理限制；正式結論仍須等待 USDT 公開資料達 60 天品質門檻後再更新。
+- P1 本機公開／私人收集器維持既有排程繼續收集；GitHub 輔助收集及兩來源合併規則暫緩，不擴大本階段範圍。
+- 專案開發暫停於本檢查點，先處理其他事項；尚未推送或合併目前安全檢查點分支。
+
+## 2026-08-22 P0 新版實作計畫完成
+
+- 使用者已確認 2026-08-19 P0 權威設計內容無誤。
+- 已建立逐檔案、逐測試的 [`P0 Funding Strategy Optimizer Implementation Plan`](docs/superpowers/plans/2026-08-22-p0-funding-strategy-optimizer.md)，共十個可獨立驗收任務。
+- 已重整 [`docs/P0_EXECUTION_CHECKLIST.md`](docs/P0_EXECUTION_CHECKLIST.md)，將功能完成與 60 天正式資料成熟度分開追蹤。
+- 盤點發現 `data/market` 已收集 `fUST`，但 `Settings.markets` 尚未把 `fUST` 納入 funding-book `data/raw`；因此列為 Task 1，避免繼續累積缺少 USDT 委託簿的資料。
+- 本階段只完成計畫與文件關聯，尚未修改模型、收集器或排程程式。
+- 下一步：依使用者選擇的執行方式，從 Task 1 以 TDD 開始。
+
+## 2026-08-19 P0 放貸策略最佳化設計確認
+
+- 已完成逐題產品需求訪談，並由使用者確認 P0 正式設計：[`docs/superpowers/specs/2026-08-19-p0-funding-strategy-optimizer-design.md`](docs/superpowers/specs/2026-08-19-p0-funding-strategy-optimizer-design.md)。
+- P0 本金由舊版 160／10,000 USDT 改為 1,000～10,000 USDT 十個級距，起始資金以每份 1,000 USDT 拆單，最多十筆。
+- 已確認比較 2／5／10／30 天、1／3／6／12／24 小時重新調價、歷史分位利率、15% 手續費、複利、資金閒置及市場容量限制。
+- 回測採 walk-forward，並比較固定歷史中位利率、FRR、低利率快速成交，以及有／無原利率預測模型的結果。
+- 正式結果門檻改為至少連續 60 天 USDT 公開資料、每小時完整率至少 90%、最長缺口不超過 6 小時且每種策略至少 30 次驗證機會；程式可先實作，未達門檻只輸出實驗結果。
+- 最終交付定為 Markdown、CSV 與本機唯讀互動介面；每天台灣時間 10:00 更新，失敗時保留上一版結果。
+- 下一步：依權威規格修訂 P0 實作計畫與執行清單，經確認後才開始程式實作。
+
+## 2026-08-19 公開與私人 CSV 每日分檔完成
+
+- 公開市場資料改存為 `data/market/<類別>/YYYY/MM/DD/<市場>.csv`，私人帳戶資料改存為 `data/account/<資料集>/YYYY/MM/DD.csv`；日期一律依 `collected_at` 轉成 UTC。
+- SQLite、metadata、狀態檔、`data/raw` 與 Windows 排程名稱維持不變。
+- 已將 2026-08-16 起的 19 個舊單檔暫存備份，依 UTC 日期分割 31,547 列至 66 個目標檔，並以來源雜湊及逐列內容完成核對。
+- 公開與私人收集器均已手動驗證；私人收集結果為 `status=success`，兩個 Windows 排程均已重新啟用。
+- 最終資料檢查：私人每日 CSV 31,041 列與 SQLite 31,041 筆一致，公開市場 754 列，日期錯置 0、完全重複 0、舊單檔 0。
+- P0 對齊、生命週期及掛單／成交配對工具均可直接讀取每日目錄；完整離線測試為 `170 passed, 1 deselected`。
+- 專用備份在 31,547 列再次驗證成功後已刪除，正式每日資料保留。
+
+## 2026-08-19 P0 回測前置框架完成
+
+- P0 詳細進度統一記錄於 [`docs/P0_EXECUTION_CHECKLIST.md`](docs/P0_EXECUTION_CHECKLIST.md)，作為後續唯一續作依據。
+- 已完成掛單生命週期表、Offers History／Funding Trades 配對稽核，以及 B1 固定利率與 B2 固定利率加固定期間的基準框架。
+- 目前產物為 `p0_offer_lifecycle.csv`、`p0_offer_trade_matches.csv` 與 `p0_fixed_baselines.csv`；基準資料明確標記為 `definition_only`，尚不是收益結果。
+- 目前真實稽核資料包含 50 筆唯一掛單：26 筆可配對成交、7 筆取消未成交、17 筆成交但目前 Trades 歷史範圍未涵蓋；26 筆配對資料的幣別、利率與期間一致。
+- 完整離線測試為 `163 passed, 1 deselected`。
+- 本段是新版設計確認前的前置成果；後續不再以私人資料滿 7 天作為唯一啟動條件。新版程式可先實作，正式結果則依 2026-08-19 權威規格的 60 天公開資料門檻判定。
+
+## 2026-08-16 最小本機穩定收集器完成
+
+- 新增 `bitfinex_lending.local_stable_collector`，重用既有 public API client、SQLite storage 與 CSV exporter。
+- 每市場最多重試 3 次，僅重試網路／HTTP／JSON 錯誤；解析錯誤直接記錄失敗。
+- 新增單次執行 lock、SQLite／CSV 保存與 `data/local-collector.log` 摘要日誌。
+- 新增操作文件：`docs/LOCAL_STABLE_COLLECTOR.md`。
+- 本階段沒有修改 GitHub Actions、沒有 push、沒有私有 API、沒有排程安裝。
+- 驗證結果：`125 passed, 1 deselected`。
+- 已註冊並啟用 Windows 工作 `BitfinexLocalStableCollector`：每小時第 47 分鐘執行，使用目前登入使用者的 `Interactive`／`Limited` 權限，工作狀態為 `Ready`。
+- 已確認排程執行檔、參數、工作目錄與 10 分鐘執行上限；尚未手動提前觸發第一次 live API 收集。
+
+## 2026-08-16 公開 market 資料收集完成
+
+- 本機排程現在同時收集 funding book 與公開 market 資料。
+- 新增 `data/market/ticker/`、`funding_stats/`、`funding_candles/`、`prices/` 四類輸出。
+- 使用同一個收集時間戳去重；market 資料失敗會記錄於本機日誌，不會抹除已成功的 funding book。
+- 本階段仍不包含 `data/account/`、私有 API、GitHub 同步與模型重建。
+
+## 2026-08-16 新增策略最佳化目標
+
+- 新增 [strategy_optimization_goals.md](strategy_optimization_goals.md)，將下一階段拆成「策略收益比較器」與「成交機率模型」。
+- 新目標會比較 160 USDT、10,000 USDT、利率、期限、成交機率、資金利用率與預期本金＋利息總和。
+- 目前尚未有完整的歷史掛單／成交／取消資料，因此成交機率仍不能宣稱為真實成交機率。
+- 幣價上漲／下跌預測與自動下單明確排除在本階段之外。
+
+## 2026-08-11 模型擴充批次完成
+
+- 完成決策樹回歸模型，沿用 168 筆門檻與 80%／20% 時序切分。
+- 加入 XGBoost optional dependency 與執行時偵測；本機目前未安裝，因此輸出會明確標示 `xgboost unavailable`。
+- 每個已訓練市場輸出 `data/modeling/prediction_<market>.svg` 預測／實際值對照圖。
+- 新增 `data/modeling/model_report.md`，整理各市場最佳模型、MAE／RMSE／R² 與人工確認限制。
+- 目前本機資料：每市場 267 筆 features、265 筆有效資料；決策樹已完成實際評估，XGBoost 尚待安裝 optional dependency 後重跑。
+- 驗證結果：`113 passed, 1 deselected`。
+
+## 2026-08-11 回測批次完成
+
+- 新增離線 `bitfinex_lending.backtesting`，只使用 validation predictions，不連線、不下單。
+- 固定模擬規則：預測利率達門檻才發出信號，實際下一期利率達門檻才視為成交；預設本金 1000、單次配置 10%、每筆資料間隔 1 小時、門檻 0。
+- 輸出成交率、資金利用率、平均等待時間、最大連續未成交時間、模擬總收益與模擬年化收益。
+- 目前輸出：`data/modeling/backtest_results.csv`，涵蓋三市場與四個已可用模型。
+- 回測結果是研究用模擬，不代表實際成交、收益或投資建議；XGBoost optional dependency 已安裝並納入三市場評估。
+- 本批完整測試為 `123 passed, 1 deselected`。
+
+## 2026-08-11 決策輔助輸出完成
+
+- 新增 `decision_support.csv` 與 `decision_support.md`。
+- 每市場依 validation RMSE 選出目前最佳模型，輸出最新預測、10%–90% 實際觀測區間、baseline_previous 比較、成交率與平均等待時間。
+- 資料不足市場會輸出 `insufficient_data` 並保留限制訊息，不臆造預測。
+- 所有輸出固定標示需人工確認與不自動下單。
+
+## 2026-08-11 回測解讀與 XGBoost 完成
+
+- 新增 `data/modeling/backtest_report.md`，依模擬總收益排序模型並列出成交率、資金利用率與等待時間。
+- XGBoost 已實際加入三市場模型評估；仍須注意模型比較與回測均為離線研究結果。
+
+## 2026-07-29 專案續作基準與結案測試影片完成
+
+### 重要範圍說明
+
+- 目前完成的 `Bitfinex 系統架構與資料流` 影片是**結案測試影片／技術驗證版**，用途是驗證結案呈現可能採用的資料流程、視覺語言與影片製作流程。
+- 測試影片**不是正式結案報告、正式結案簡報或正式結案影片**，也不代表結案內容已定稿。
+- **實際結案報告目前尚未開始製作**。正式報告仍須另行規劃章節、整理最新資料與模型結果、補齊回測與限制說明，經確認後再開始撰寫。
+
+### 結案測試影片成果
+
+已在隔離分支 `feature/bitfinex-system-flow-motion` 完成 25 秒 HyperFrames 測試影片：
+
+- 成品位置：`.worktrees/bitfinex-system-flow-motion/videos/bitfinex-system-flow/renders/bitfinex-system-flow.mp4`
+- 規格：1920×1080、25 秒、H.264 MP4。
+- 內容：呈現 Bitfinex funding-book、GitHub Actions、Raw CSV／SQLite、特徵工程、`80 / 168` 資料門檻及 `insufficient_data` 狀態。
+- 內容限制：不虛構 MAE、RMSE、R²、收益率或成交率；清楚標示系統不自動下單。
+- HyperFrames 0.7.78 完整檢查：runtime、layout、motion、contrast 均無 error；文字對比 59/59 通過。
+- Proof snapshots：5.5 秒、17 秒、24 秒與 24.25 秒均已產生並人工檢視。
+- 專案完整離線測試：`110 passed, 1 deselected`。
+- 測試影片已提交於功能分支，commit：`7c1dbcf` (`feat: deliver Bitfinex system flow motion graphic`)；尚未合併回 `master`。
+
+### 截至目前的整體成果
+
+- 已完成 Bitfinex Public Books 三市場 `fUSD`、`fBTC`、`fETH` 的資料收集、錯誤處理、SQLite 與 CSV 輸出。
+- 已完成每小時 GitHub Actions 自動收集、UTC 每日分檔、run ID 去重與自動 commit。
+- 已完成 repository raw CSV 載入、特徵工程、168 筆有效資料門檻、80%／20% 時序切分、兩個 baseline 與線性迴歸。
+- 已完成每日 `18:37 UTC` 建模 workflow，並以手動 workflow run `30369249612` 完成遠端驗收。
+- 最近已驗收的資料狀態為每市場 82 筆 features、80 筆有效模型資料；三市場均正確輸出 `insufficient_data`，未產生不可信的評估或預測。
+- 目前尚未完成：第一次 scheduled modeling run 的留證、達 168 筆後的實際模型評估、決策樹、XGBoost、回測、業務指標、決策輔助輸出、正式 Demo 與正式結案報告。
+
+### 下次續作起點
+
+1. 先同步 `origin/master`，確認 collector 與每日 modeling workflow 的最新 runs 及資料筆數。
+2. 補記至少一次每日 `18:37 UTC` scheduled modeling run 的成功證據。
+3. 任一市場達 168 筆有效資料後，驗證 `baseline_mean`、`baseline_previous`、`linear_regression` 的真實 MAE、RMSE、R² 與 predictions。
+4. 依資料成熟度決定是否進入第二階段：決策樹、XGBoost、回測與業務指標。
+5. 另行建立正式結案報告規格與大綱；在此之前，測試影片僅作為呈現方式參考，不得當作正式結案成果。
+6. 決定是否將 `feature/bitfinex-system-flow-motion` 合併回 `master`；合併前保留現有 worktree 與影片成品。
+
 ## 2026-07-28 同步後待辦盤點與模型資料重建
 
 本機 `master` 已與 `origin/master` 同步，第一階段自動建模功能已合併並推送。遠端每小時 collector 已持續產生跨日資料 commits，確認 scheduled collection 正常運作。
@@ -221,3 +364,10 @@ GitHub 遠端驗收：
 - 成交機率估計需要明確定義模擬規則，否則容易產生誤導。
 - 系統必須明確標示不自動下單、需人工確認。
 - API 格式若變更，資料解析邏輯需調整。
+## 私有 Funding 唯讀收集器
+
+- [x] 唯讀 authenticated client 與權限檢查
+- [x] Funding 資料本機儲存與去重
+- [x] 私有 Funding collector 串接
+- [x] 本機憑證讀取與 `--dry-run`
+- [x] 排程安裝腳本（預覽模式；尚未啟用）

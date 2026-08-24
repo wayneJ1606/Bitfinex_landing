@@ -26,6 +26,11 @@ def test_default_settings_keep_usd_and_usdt_as_distinct_funding_markets() -> Non
     assert Settings().markets == ("fUSD", "fUST", "fBTC", "fETH")
 
 
+def test_default_settings_remain_the_github_actions_roots() -> None:
+    assert Settings().csv_directory == Path("data/raw")
+    assert Settings().market_directory == Path("data/market")
+
+
 def test_main_initializes_storage_creates_directories_and_prints_summary(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

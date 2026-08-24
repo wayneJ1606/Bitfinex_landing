@@ -21,6 +21,13 @@ from .runner import run_collection
 from .collector_run_history import CollectorRunRecord, append_collector_run
 
 
+def local_public_settings() -> Settings:
+    return Settings(
+        csv_directory=Path("data/local_public/raw"),
+        market_directory=Path("data/local_public/market"),
+    )
+
+
 class ClientLike(Protocol):
     def fetch_book(self, market: str) -> object: ...
 
@@ -238,7 +245,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     from datetime import datetime, timezone
     from uuid import uuid4
 
-    settings = Settings()
+    settings = local_public_settings()
     client = BitfinexClient(requests.Session(), base_url=settings.api_base_url, precision=settings.precision, length=settings.book_length, timeout=settings.timeout)
     summary = run_stable_collection(
         settings,

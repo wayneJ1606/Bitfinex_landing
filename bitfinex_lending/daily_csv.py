@@ -9,7 +9,7 @@ from .csv_export import FIELD_NAMES, CsvExportError
 from .models import FundingBookRow
 
 
-SUPPORTED_MARKETS = frozenset({"fUSD", "fBTC", "fETH"})
+SUPPORTED_MARKETS = frozenset({"fUSD", "fUST", "fBTC", "fETH"})
 
 
 def _validate_rows(rows: Sequence[FundingBookRow]) -> FundingBookRow:

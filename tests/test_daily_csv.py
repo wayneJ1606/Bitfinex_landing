@@ -38,6 +38,13 @@ def test_append_daily_snapshot_uses_utc_daily_market_path(tmp_path: Path) -> Non
     assert len(read_csv(path)) == 3
 
 
+def test_append_daily_snapshot_accepts_usdt_funding_market(tmp_path: Path) -> None:
+    path = append_daily_snapshot(make_rows(market="fUST"), tmp_path)
+
+    assert path == tmp_path / "2026" / "07" / "21" / "fUST.csv"
+    assert {row[1] for row in read_csv(path)[1:]} == {"fUST"}
+
+
 def test_append_daily_snapshot_appends_without_repeating_header(tmp_path: Path) -> None:
     path = append_daily_snapshot(make_rows("run-1"), tmp_path)
     append_daily_snapshot(

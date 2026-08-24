@@ -1,5 +1,15 @@
 # Bitfinex 放貸市場決策輔助系統進度紀錄
 
+## 2026-08-24 GitHub 公開資料分流與同步完成
+
+- GitHub Actions 公開 funding-book 保留於 `data/raw/`；本機公開收集器已改寫入 `data/local_public/raw/` 與 `data/local_public/market/`，兩個來源不再共同修改同一批 CSV。
+- 已將 2026-08-16～2026-08-24 的本機公開資料核對後分流；第一次 GitHub 同步共 149 個檔案、2,685,616 bytes，commit `c3329ea`，遠端 commit tree 經確認只含 `data/local_public/`。
+- 舊位置的 147 個來源檔已在雜湊核對後移至本機可復原封存區 `data/archive/local-public-pre-separation-20260824/`；私人 `data/account/`、憑證、私人狀態及識別碼未同步。
+- 公開／私人收集器程式、排程、測試、操作文件、實驗模型／Dashboard、`progress.md`、`todo.md` 與關聯文件均已同步至 GitHub `master`。
+- 實際排程驗證發現每日 CSV 寫入器遺漏 `fUST`；已以測試重現並修正，commit `a6bedfa`。本機公開收集器再次執行為 `LastTaskResult=0`，fUSD／fUST／fBTC／fETH 均成功寫入新路徑。
+- 已註冊並啟用 `BitfinexPublicGitHubSync`：每週一台灣時間 10:00、`pythonw.exe`、`IgnoreNew`、`StartWhenAvailable`、30 分鐘上限。手動無變更驗證為 `status=no_changes`、`LastTaskResult=0`，下次執行時間為 2026-08-31 10:00。
+- 最終完整離線測試為 `276 passed, 1 deselected`。正式操作文件保留於 [`docs/PUBLIC_GITHUB_SYNC.md`](docs/PUBLIC_GITHUB_SYNC.md)；兩來源衝突判定與模型層合併仍為後續工作。
+
 ## 2026-08-24 實驗模型與 Dashboard 暫停檢查點
 
 - `fUST` 已納入本機 funding-book 收集與原始 CSV 寫入；USD 與 USDT 仍視為不同市場，不以 `fUSD` 取代 `fUST` 的市場行為。

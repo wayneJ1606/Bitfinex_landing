@@ -11,6 +11,7 @@ from pathlib import Path
 
 from .p0_experimental_dashboard import export_experimental_dashboard
 from .p0_experimental_payload import build_experimental_payload
+from .p0_readable_dashboard import export_readable_dashboard
 
 
 @dataclass(frozen=True)
@@ -18,6 +19,7 @@ class ExperimentalPipelineSummary:
     status: str
     json_path: Path
     dashboard_path: Path
+    readable_dashboard_path: Path
 
 
 def run_experimental_pipeline(
@@ -43,10 +45,14 @@ def run_experimental_pipeline(
     json.loads(temporary.read_text(encoding="utf-8"))
     temporary.replace(json_path)
     dashboard_path = export_experimental_dashboard(payload, output_root / "dashboard.html")
+    readable_dashboard_path = export_readable_dashboard(
+        payload, output_root / "dashboard_readable_zh.html"
+    )
     return ExperimentalPipelineSummary(
         status=str(payload["status"]),
         json_path=json_path,
         dashboard_path=dashboard_path,
+        readable_dashboard_path=readable_dashboard_path,
     )
 
 
@@ -77,6 +83,7 @@ def main() -> int:
     print(f"status={summary.status}")
     print(f"json={summary.json_path}")
     print(f"dashboard={summary.dashboard_path}")
+    print(f"readable_dashboard={summary.readable_dashboard_path}")
     return 0
 
 

@@ -1,5 +1,14 @@
 # Bitfinex 放貸市場決策輔助系統進度紀錄
 
+## 2026-08-31 P0 Task 8 正式唯讀 Dashboard 完成
+
+- 新增 `bitfinex_lending/p0_dashboard.py`，由 Task 7 的 `dashboard_data.json` 產生獨立 `dashboard.html`；既有實驗 Dashboard 2.1 保留不覆蓋。
+- 介面提供 1,000～10,000 USDT 本金、USDT／BTC／ETH、2／5／10／30 天期限及 1／3／6／12／24 小時等待條件，並呈現最高收益、較穩定方案及簡單基準比較。
+- 介面完全離線唯讀，不呼叫 API、不包含下單功能；嵌入 JSON 會安全編碼，並顯示實驗成熟度、最後成功時間、更新錯誤與超過 48 小時的資料過期警示。
+- Task 8 commit 為 `55c0b0a`；Task 7／8 專項整合測試 `13 passed`，合併後完整測試 `356 passed, 1 deselected`。
+- Codex 內建瀏覽器當時沒有可用分頁，因此尚未留下畫面截圖；HTML 產生、資料合約、離線限制與安全行為均已有自動測試。
+- 下一步為 P0 Task 9：建立每日分析管線與台灣時間 10:00 的 preview-first Windows 排程。
+
 ## 2026-08-31 P0 Task 7 統一輸出完成
 
 - 新增 `bitfinex_lending/p0_strategy_output.py`，由同一份經過清理的策略資料原子產生 `strategy_results.csv`、`report.md`、`dashboard_data.json` 與 `status.json`。

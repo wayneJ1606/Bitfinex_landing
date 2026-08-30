@@ -16,6 +16,7 @@
 - 已完成 Task 5 的 1,000～10,000 USDT 拆單、30 天複利、市場容量限制、最高期末本金與 P10 穩定方案；合併後完整測試為 333 passed、1 deselected。
 - 已完成 Task 6 每日 walk-forward、三種簡單基準、有／無預測比較與後續 30 天實際模擬評分；合併後完整測試為 343 passed、1 deselected。
 - 已完成 Task 7 統一策略結果的 CSV、Markdown、JSON、狀態檔原子發布、隱私欄位阻擋與 last-good 保護；commit `51dd586`，合併後完整測試為 351 passed、1 deselected。
+- 已完成 Task 8 正式本機唯讀 Dashboard 產生器，可由 Task 7 JSON 顯示本金、資產、期限、等待時間、最高收益、穩定方案、基準比較、成熟度及 48 小時過期警示；commit `55c0b0a`，合併後完整測試為 356 passed、1 deselected。
 - 已建立公開成交代理的實驗候選策略與 USDT-only Dashboard 2.1；四種期限均有快速成交與中位利率基準。
 - 公開資料已與私人資料分流，257 個最新本機公開檔已安全同步至 GitHub；私人帳戶資料只留本機。
 
@@ -23,13 +24,13 @@
 
 - 公開與私人資料持續累積。
 - USDT 公開特徵資料目前為 282／1,440 小時（約 19.6%），未達 60 天正式門檻。
-- 正式 P0 尚待完成正式 Dashboard 接入、每日分析排程及 production path 驗證。
+- 正式 P0 尚待完成每日分析排程及 production path 驗證。
 - 實驗 Dashboard 可供結案報告展示，但成交代理可信度仍為「非常低」。
 
 ## 下次接續
 
-1. 執行 Task 8，將 Task 7 的 `dashboard_data.json` 接入正式本機唯讀 Dashboard。
-2. 完成後再執行 Task 9 每日分析管線與台灣時間 10:00 排程。
+1. 執行 Task 9 每日分析管線，依序串接公開歷史、walk-forward、成熟度、Task 7 輸出與 Task 8 Dashboard。
+2. 建立台灣時間 10:00、preview-first 的 Windows 排程安裝腳本。
 3. 先以實驗結果建立結案報告，資料成熟後再更新正式數字。
 
 ## 重要限制

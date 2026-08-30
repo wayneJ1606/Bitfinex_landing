@@ -24,7 +24,7 @@
 - [x] Task 5：建立 1,000～10,000 USDT 拆單、複利與組合最佳化（commit `4f0a833`；13 focused tests passed）
 - [x] Task 6：建立 walk-forward、三種簡單基準及有／無預測模型比較（commit `d55ae41`；16 focused tests passed）
 - [x] Task 7：原子輸出 Markdown、CSV、JSON、狀態與保留上一版結果（commit `51dd586`；8 focused tests passed）
-- [ ] Task 8：建立本機唯讀互動介面（實驗版 Dashboard 2.1 已完成；正式版須接入 Task 2～7 的統一結果）
+- [x] Task 8：建立讀取 Task 7 統一結果的正式本機唯讀互動介面（commit `55c0b0a`；13 focused integration tests passed）
 - [ ] Task 9：建立每日台灣時間 10:00 分析管線與排程
 - [ ] Task 10：執行 production path、完整測試、隱私檢查及文件交接
 
@@ -43,7 +43,7 @@
 
 ## D. 下一次續作入口
 
-1. 從實作計畫 Task 8 開始，將 Task 7 的統一結果接入正式本機唯讀 Dashboard。
+1. 從實作計畫 Task 9 開始，建立每日分析管線及台灣時間 10:00 排程。
 2. 每完成一個 Task，執行該 Task 的 focused tests 並獨立提交。
 3. 不因資料尚未滿 60 天而停止功能實作。
 4. Task 9 每日排程必須沿用 Task 7 的 last-good 與隱私保護，不得直接覆寫成功結果。

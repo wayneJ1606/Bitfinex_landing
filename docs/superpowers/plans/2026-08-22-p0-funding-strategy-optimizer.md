@@ -734,7 +734,7 @@ git commit -m "feat: publish atomic P0 strategy results"
 - Consumes: `dashboard_data.json` produced by Task 7.
 - Produces: `data/modeling/p0_strategy/latest/dashboard.html` with no API client and no write actions.
 
-- [ ] **Step 1: Write HTML contract tests**
+- [x] **Step 1: Write HTML contract tests**
 
 ```python
 def test_dashboard_contains_only_approved_controls_and_read_only_copy(tmp_path: Path) -> None:
@@ -753,23 +753,23 @@ def test_dashboard_contains_only_approved_controls_and_read_only_copy(tmp_path: 
     assert "fetch(" not in html and "/auth/w/" not in html
 ```
 
-- [ ] **Step 2: Run the test and confirm import failure**
+- [x] **Step 2: Run the test and confirm import failure**
 
 Run: `python -m pytest tests/test_p0_dashboard.py -q`
 
 Expected: FAIL because the dashboard exporter is absent.
 
-- [ ] **Step 3: Implement a self-contained static dashboard**
+- [x] **Step 3: Implement a self-contained static dashboard**
 
 Generate UTF-8 HTML with embedded canonical JSON, Traditional Chinese labels, capital/asset/period/wait selectors, highest-return and stable cards, baseline comparison table, readiness badge, last-success time, stale/error banner, and limitations. JavaScript may only filter and render embedded data; it must not use network requests, credentials, or Bitfinex endpoints.
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `python -m pytest tests/test_p0_dashboard.py tests/test_p0_strategy_output.py -q`
 
 Expected: PASS and all displayed numeric values originate from dashboard JSON.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add bitfinex_lending/p0_dashboard.py tests/test_p0_dashboard.py

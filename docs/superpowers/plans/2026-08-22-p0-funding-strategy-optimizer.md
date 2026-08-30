@@ -652,7 +652,7 @@ git commit -m "feat: add P0 walk-forward comparisons"
 - Failure updates only `data/metadata/p0_strategy_status.json` and preserves the prior `latest` directory.
 - Produces `OutputPaths(csv_path: Path, report_path: Path, json_path: Path, status_path: Path)` from `publish_strategy_outputs(payload, output_root)`.
 
-- [ ] **Step 1: Write cross-format consistency and privacy tests**
+- [x] **Step 1: Write cross-format consistency and privacy tests**
 
 ```python
 def test_publish_uses_one_canonical_payload_for_all_formats(tmp_path: Path) -> None:
@@ -688,13 +688,13 @@ def test_publish_uses_one_canonical_payload_for_all_formats(tmp_path: Path) -> N
 
 Add tests that no output key contains `api_key`, `offer_id`, `event_id`, or `raw_payload`, and that a forced write failure leaves the previous `latest` byte-for-byte unchanged.
 
-- [ ] **Step 2: Run tests and confirm import failure**
+- [x] **Step 2: Run tests and confirm import failure**
 
 Run: `python -m pytest tests/test_p0_strategy_output.py -q`
 
 Expected: FAIL because the output publisher is absent.
 
-- [ ] **Step 3: Implement one canonical serializable payload**
+- [x] **Step 3: Implement one canonical serializable payload**
 
 ```python
 SAFE_RESULT_FIELDS = (
@@ -709,13 +709,13 @@ Write all four artifacts into a sibling temporary directory, reopen and validate
 
 For BTC and ETH, convert each USDT benchmark into asset units using the first eligible walk-forward price, keep all interest calculations in that asset, and show a separate current-USDT estimate using the latest local `tBTCUSD` or `tETHUSD` row together with its timestamp. Never mix the converted USDT estimate into the asset-denominated return calculation.
 
-- [ ] **Step 4: Run focused tests**
+- [x] **Step 4: Run focused tests**
 
 Run: `python -m pytest tests/test_p0_strategy_output.py -q`
 
 Expected: PASS, including last-good preservation.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add bitfinex_lending/p0_strategy_output.py tests/test_p0_strategy_output.py

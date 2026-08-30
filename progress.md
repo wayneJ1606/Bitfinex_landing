@@ -1,5 +1,13 @@
 # Bitfinex 放貸市場決策輔助系統進度紀錄
 
+## 2026-08-31 P0 Task 7 統一輸出完成
+
+- 新增 `bitfinex_lending/p0_strategy_output.py`，由同一份經過清理的策略資料原子產生 `strategy_results.csv`、`report.md`、`dashboard_data.json` 與 `status.json`。
+- 僅在四個檔案全部寫入並重新驗證成功後更新 `latest`；寫入失敗時保留上一個成功版本，避免 Dashboard 讀到半套或損壞資料。
+- 遞迴阻擋 `api_key`、`offer_id`、`event_id`、`raw_payload` 等私人或識別欄位，並將非正式成熟度一律標示為 `experimental`。
+- Task 7 commit 為 `51dd586`；專項測試 `8 passed`，合併後完整測試 `351 passed, 1 deselected`。
+- 下一步為 P0 Task 8：讀取 `dashboard_data.json` 產生正式本機唯讀 Dashboard，不修改既有實驗 Dashboard 2.1。
+
 ## 2026-08-30 專案盤點、Dashboard 2.1 與資料更新
 
 - 限定 P0 稽核發現執行清單落後於實際程式：Task 2 官方計息與資金網格、Task 3 小時市場標準化與成熟度判定其實已分別由 commits `a2a0c5e`、`3ab21f6`／`f3044a5` 完成。重跑 Task 2／3、舊版固定基準與實驗 Dashboard 相關測試為 `72 passed`；第一個真正未完成的正式任務改為 Task 4。

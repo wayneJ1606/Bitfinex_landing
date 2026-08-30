@@ -20,7 +20,7 @@
 - [x] Task 1：將 `fUST` 納入 funding-book 原始資料收集
 - [x] Task 2：實作官方按秒計息、15% 手續費與 1,000 單位拆單規則（commit `a2a0c5e`；30 tests passed）
 - [x] Task 3：建立公開市場小時資料標準化與新版 60 天資料門檻（commits `3ab21f6`、`f3044a5`）
-- [ ] Task 4：建立五個利率分位點、成交機率、等待時間與容量統計
+- [x] Task 4：建立五個利率分位點、成交機率、等待時間與容量統計（commit `dc29672`；9 focused tests passed）
 - [ ] Task 5：建立 1,000～10,000 USDT 拆單、複利與組合最佳化
 - [ ] Task 6：建立 walk-forward、三種簡單基準及有／無預測模型比較（目前僅有尚未提交的舊版 `definition_only` 固定基準框架，不算 Task 6 完成）
 - [ ] Task 7：原子輸出 Markdown、CSV、JSON、狀態與保留上一版結果
@@ -43,7 +43,7 @@
 
 ## D. 下一次續作入口
 
-1. 從實作計畫 Task 4 開始，以 TDD 完成五個利率分位點、成交可能性、等待時間與容量統計。
+1. 從實作計畫 Task 5 開始，以 TDD 完成 1,000～10,000 USDT 拆單、複利與組合最佳化。
 2. 每完成一個 Task，執行該 Task 的 focused tests 並獨立提交。
 3. 不因資料尚未滿 60 天而停止功能實作。
 4. 不得跳過 Task 7 的 last-good 與隱私保護後直接啟用每日排程。

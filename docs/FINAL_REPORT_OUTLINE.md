@@ -98,6 +98,7 @@
 
 ## 四、目前可直接使用的素材
 
+- 結案報告文字素材：[`FINAL_REPORT_CONTENT_NOTES.md`](FINAL_REPORT_CONTENT_NOTES.md)
 - 原始企劃：[`../專案企劃書_Bitfinex放貸決策輔助系統_現實可用版.md`](../專案企劃書_Bitfinex放貸決策輔助系統_現實可用版.md)
 - PRD：[`../prd.md`](../prd.md)
 - P0 權威設計：[`superpowers/specs/2026-08-19-p0-funding-strategy-optimizer-design.md`](superpowers/specs/2026-08-19-p0-funding-strategy-optimizer-design.md)

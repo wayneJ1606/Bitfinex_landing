@@ -1,0 +1,3 @@
+collected_at,market,mts,frr,avg_period,funding_amount,funding_amount_used,funding_below_threshold,payload_json
+2026-08-31T00:47:03.103966+00:00,fBTC,1788134700000,0,32.38,882.74300386,882.07109929,2471.7984001,"[1788134700000, null, null, 0, 32.38, null, null, 882.74300386, 882.07109929, null, null, 2471.7984001, null, null, null, null, null, null, null, null, null, null, null, null]"
+2026-08-31T01:47:03.822227+00:00,fBTC,1788138300000,0,32.41,872.99811222,872.3330086,2474.93118164,"[1788138300000, null, null, 0, 32.41, null, null, 872.99811222, 872.3330086, null, null, 2474.93118164, null, null, null, null, null, null, null, null, null, null, null, null]"

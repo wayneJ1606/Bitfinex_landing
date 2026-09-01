@@ -152,7 +152,13 @@ def _as_of(series: tuple[tuple[datetime, object], ...], observed_at: datetime) -
     return value
 
 
-def load_market_hours(market_root: Path, raw_root: Path, api_symbol: str) -> tuple[MarketHour, ...]:
+def load_market_hours(
+    market_root: Path,
+    raw_root: Path,
+    api_symbol: str,
+    *,
+    skip_incomplete: bool = False,
+) -> tuple[MarketHour, ...]:
     if api_symbol not in ASSET_BY_SYMBOL:
         raise MarketHistoryError(f"unsupported API symbol: {api_symbol}")
     market_root = Path(market_root)
@@ -165,6 +171,8 @@ def load_market_hours(market_root: Path, raw_root: Path, api_symbol: str) -> tup
         candle = _as_of(candles, observed_at)
         stat = _as_of(stats, observed_at)
         demand = _as_of(books, observed_at)
+        if skip_incomplete and (candle is None or stat is None or demand is None):
+            continue
         if candle is None:
             raise MarketHistoryError(f"missing eligible candle for {api_symbol} at {observed_at.isoformat()}")
         if stat is None:

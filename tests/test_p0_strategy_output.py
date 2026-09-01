@@ -80,6 +80,23 @@ def test_non_formal_readiness_is_published_as_experimental(tmp_path: Path) -> No
     assert dashboard["status"] == "experimental"
 
 
+def test_strategy_and_portfolio_types_survive_every_machine_readable_output(
+    tmp_path: Path,
+) -> None:
+    compatible = payload()
+    compatible["results"][0]["strategy_type"] = "optimized_without_prediction"
+    compatible["results"][0]["portfolio_type"] = "stable_alternative"
+
+    paths = publish_strategy_outputs(compatible, tmp_path)
+
+    csv_rows = list(csv.DictReader(paths.csv_path.open(encoding="utf-8", newline="")))
+    dashboard = json.loads(paths.json_path.read_text(encoding="utf-8"))
+    assert csv_rows[0]["strategy_type"] == "optimized_without_prediction"
+    assert dashboard["results"][0]["strategy_type"] == "optimized_without_prediction"
+    assert dashboard["results"][0]["portfolio_type"] == "stable_alternative"
+    assert "optimized_without_prediction" in paths.report_path.read_text(encoding="utf-8")
+
+
 def test_forced_write_failure_preserves_previous_latest_byte_for_byte(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

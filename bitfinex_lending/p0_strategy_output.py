@@ -14,6 +14,7 @@ from typing import Mapping
 SAFE_RESULT_FIELDS = (
     "asset",
     "principal",
+    "strategy_type",
     "portfolio_type",
     "leg_count",
     "daily_rates",
@@ -137,14 +138,15 @@ def _write_report(path: Path, payload: Mapping[str, object]) -> None:
         "",
         "## 結果",
         "",
-        "| 資產 | 本金 | 組合 | 淨利息 | 期末本金 | 閒置比例 |",
-        "|---|---:|---|---:|---:|---:|",
+        "| 資產 | 本金 | 策略 | 組合 | 淨利息 | 期末本金 | 閒置比例 |",
+        "|---|---:|---|---|---:|---:|---:|",
     ]
     for row in payload["results"]:
         lines.append(
-            "| {asset} | {principal} | {portfolio_type} | {net_interest} | {ending_capital} | {idle_fraction} |".format(
+            "| {asset} | {principal} | {strategy_type} | {portfolio_type} | {net_interest} | {ending_capital} | {idle_fraction} |".format(
                 asset=row.get("asset", ""),
                 principal=row.get("principal", ""),
+                strategy_type=row.get("strategy_type", ""),
                 portfolio_type=row.get("portfolio_type", ""),
                 net_interest=row.get("net_interest", ""),
                 ending_capital=row.get("ending_capital", ""),

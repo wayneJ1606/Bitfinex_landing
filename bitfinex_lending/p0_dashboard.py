@@ -114,7 +114,7 @@ def _html(payload: Mapping[str, object]) -> str:
   const data = JSON.parse(document.getElementById("dashboard-data").textContent);
   const state = {{ period: 2, wait: 1 }};
   const byId = (id) => document.getElementById(id);
-  const labels = {{ highest_return:"最高收益", stable:"較穩定", fixed_median:"固定中位利率", frr:"FRR 市場利率", quick_fill:"低利率快速成交", with_prediction:"使用預測", without_prediction:"不使用預測" }};
+  const labels = {{ highest_return:"最高收益", stable_alternative:"較穩定", fixed_median:"固定中位利率", frr:"FRR 市場利率", quick_fill:"低利率快速成交", optimized_with_prediction:"使用預測", optimized_without_prediction:"不使用預測" }};
   const value = (row, key, suffix="") => row && row[key] !== undefined && row[key] !== "" ? String(row[key]) + suffix : "—";
   const includesNumber = (item, selected) => Array.isArray(item) ? item.map(Number).includes(selected) : Number(item) === selected;
   const matching = () => data.results.filter((row) => String(row.asset) === byId("asset").value && String(row.principal) === byId("capital").value && includesNumber(row.period_days, state.period) && includesNumber(row.wait_hours, state.wait));
@@ -130,10 +130,11 @@ def _html(payload: Mapping[str, object]) -> str:
   }};
   const render = () => {{
     const rows=matching();
-    renderCard(byId("highest-return"),rows.find((row)=>row.portfolio_type==="highest_return"));
-    renderCard(byId("stable-return"),rows.find((row)=>row.portfolio_type==="stable"));
+    const preferred=(portfolioType)=>rows.find((row)=>row.portfolio_type===portfolioType && row.strategy_type==="optimized_with_prediction") || rows.find((row)=>row.portfolio_type===portfolioType && row.strategy_type==="optimized_without_prediction") || rows.find((row)=>row.portfolio_type===portfolioType);
+    renderCard(byId("highest-return"),preferred("highest_return"));
+    renderCard(byId("stable-return"),preferred("stable_alternative") || preferred("stable"));
     const body=byId("baseline-body"); body.replaceChildren();
-    rows.filter((row)=>!["highest_return","stable"].includes(row.portfolio_type)).forEach((row) => {{ const tr=document.createElement("tr"); [labels[row.portfolio_type] || row.portfolio_type,value(row,"fill_probability"),value(row,"average_wait_hours"," 小時"),value(row,"net_interest"),value(row,"ending_capital")].forEach((item)=>{{ const td=document.createElement("td"); td.textContent=item; tr.append(td); }}); body.append(tr); }});
+    rows.filter((row)=>!["stable","stable_alternative"].includes(row.portfolio_type) && (row.portfolio_type!=="highest_return" || String(row.strategy_type).startsWith("optimized_"))).forEach((row) => {{ const tr=document.createElement("tr"); [labels[row.strategy_type] || labels[row.portfolio_type] || row.strategy_type || row.portfolio_type,value(row,"fill_probability"),value(row,"average_wait_hours"," 小時"),value(row,"net_interest"),value(row,"ending_capital")].forEach((item)=>{{ const td=document.createElement("td"); td.textContent=item; tr.append(td); }}); body.append(tr); }});
     byId("baseline-empty").classList.toggle("hidden",body.children.length > 0);
   }};
   document.querySelectorAll("[data-period]").forEach((button) => button.addEventListener("click",()=>{{ state.period=Number(button.dataset.period); document.querySelectorAll("[data-period]").forEach((item)=>item.classList.toggle("active",item===button)); render(); }}));

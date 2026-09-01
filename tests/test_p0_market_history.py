@@ -84,6 +84,27 @@ def test_rejects_required_pairing_that_is_91_minutes_old(tmp_path: Path) -> None
         load_market_hours(tmp_path / "market", tmp_path / "raw", "fUST")
 
 
+def test_pipeline_mode_skips_incomplete_cross_source_hours_without_hiding_bad_rows(
+    tmp_path: Path,
+) -> None:
+    _public_fixture(tmp_path / "market", tmp_path / "raw")
+    ticker_path = tmp_path / "market" / "ticker" / "2026" / "08" / "01" / "fUST.csv"
+    rows = list(csv.DictReader(ticker_path.open(encoding="utf-8", newline="")))
+    missing_pair = dict(rows[0])
+    missing_pair["collected_at"] = "2026-07-31T22:00:00+00:00"
+    _write(ticker_path, tuple(rows[0]), [missing_pair, rows[0]])
+
+    history = load_market_hours(
+        tmp_path / "market",
+        tmp_path / "raw",
+        "fUST",
+        skip_incomplete=True,
+    )
+
+    assert len(history) == 1
+    assert history[0].observed_at == datetime(2026, 8, 1, 1, tzinfo=timezone.utc)
+
+
 def test_keeps_all_offer_raw_snapshot_as_zero_visible_demand(tmp_path: Path) -> None:
     _public_fixture(tmp_path / "market", tmp_path / "raw")
     _write(

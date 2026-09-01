@@ -99,6 +99,22 @@ def test_dashboard_embeds_canonical_data_and_required_sections(tmp_path: Path) -
     assert "研究用途，不構成投資建議" in html
 
 
+def test_dashboard_uses_strategy_type_for_comparison_and_accepts_real_stable_name(
+    tmp_path: Path,
+) -> None:
+    payload = _payload()
+    payload["results"][1]["portfolio_type"] = "stable_alternative"
+    payload["results"][1]["strategy_type"] = "optimized_without_prediction"
+
+    html = export_dashboard(_write_payload(tmp_path, payload), tmp_path).read_text(
+        encoding="utf-8"
+    )
+
+    assert 'preferred("stable_alternative")' in html
+    assert "labels[row.strategy_type]" in html
+    assert 'row.strategy_type==="optimized_with_prediction"' in html
+
+
 def test_dashboard_escapes_script_closing_text_inside_embedded_json(tmp_path: Path) -> None:
     payload = _payload()
     payload["limitations"] = ["請勿插入 </script><script>alert(1)</script>"]

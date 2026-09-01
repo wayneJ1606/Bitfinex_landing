@@ -1,6 +1,6 @@
 # P0 業師建議版執行清單
 
-最後更新：2026-08-31
+最後更新：2026-09-01
 
 本文件是 P0 的可勾選進度入口。需求與完成定義以 [`P0 放貸策略最佳化設計`](superpowers/specs/2026-08-19-p0-funding-strategy-optimizer-design.md) 為準；逐檔案、逐測試的執行順序以 [`P0 Funding Strategy Optimizer Implementation Plan`](superpowers/plans/2026-08-22-p0-funding-strategy-optimizer.md) 為準。`todo.md` 只維護上層目標，`progress.md` 只新增已驗證里程碑。
 
@@ -25,7 +25,7 @@
 - [x] Task 6：建立 walk-forward、三種簡單基準及有／無預測模型比較（commit `d55ae41`；16 focused tests passed）
 - [x] Task 7：原子輸出 Markdown、CSV、JSON、狀態與保留上一版結果（commit `51dd586`；8 focused tests passed）
 - [x] Task 8：建立讀取 Task 7 統一結果的正式本機唯讀互動介面（commit `55c0b0a`；13 focused integration tests passed）
-- [ ] Task 9：建立每日台灣時間 10:00 分析管線與排程
+- [x] Task 9：建立每日台灣時間 10:00 分析管線與排程（Task 9A commit `23fbc3c`；Task 9B commit `c6e54e1`；合併後 `367 passed, 1 deselected`；排程手動驗收 `LastTaskResult=0`）
 - [ ] Task 10：執行 production path、完整測試、隱私檢查及文件交接
 
 ## C. 正式資料成熟度（與功能完成分開）
@@ -43,7 +43,7 @@
 
 ## D. 下一次續作入口
 
-1. 從實作計畫 Task 9 開始，建立每日分析管線及台灣時間 10:00 排程。
-2. 每完成一個 Task，執行該 Task 的 focused tests 並獨立提交。
-3. 不因資料尚未滿 60 天而停止功能實作。
-4. Task 9 每日排程必須沿用 Task 7 的 last-good 與隱私保護，不得直接覆寫成功結果。
+1. 從實作計畫 Task 10 開始，執行 production path、跨格式數字一致性、完整測試與隱私檢查。
+2. 將 Task 10 的實際測試數、狀態、限制及下一個資料成熟度檢查點寫回 `progress.md`、`todo.md` 與本清單。
+3. 不因資料尚未滿 60 天而停止文件與結案報告整理；正式策略結論仍須等待 C 節門檻。
+4. Task 9 排程已啟用；下次續作先確認 `BitfinexP0StrategyAnalysis` 最近結果為成功，再進行 Task 10。

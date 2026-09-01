@@ -49,7 +49,9 @@
 - [x] 完成 walk-forward 與固定中位利率、FRR、低利率快速成交基準比較（P0 Task 6）
 - [x] 統一 CSV、JSON、Markdown 與狀態輸出，並建立原子發布、隱私阻擋及 last-good 保護（P0 Task 7）
 - [x] 將 Task 7 統一結果接入正式本機唯讀 Dashboard（P0 Task 8）
-- [ ] 建立每日策略分析管線及台灣時間 10:00 排程，失敗時保留上一個成功版本（P0 Task 9）
+- [x] 建立每日策略分析管線及台灣時間 10:00 排程，失敗時保留上一個成功版本（P0 Task 9）
+  - [x] Task 9A：完成手動分析管線、原子輸出、last-good 與實際本機資料驗證
+  - [x] Task 9B：完成 preview-first 排程腳本、操作文件、每日排程註冊與手動觸發驗收
 - [ ] 完成正式 P0 全套測試、隱私檢查與 production path 驗證
 
 ### 結案報告與資料成熟度

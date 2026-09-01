@@ -1,5 +1,14 @@
 # Bitfinex 放貸市場決策輔助系統進度紀錄
 
+## 2026-09-01 P0 Task 9 手動分析管線與每日排程完成
+
+- Task 9A 已新增 `bitfinex_lending/p0_strategy_pipeline.py`，可手動讀取本機公開市場資料與可選的私人衍生統計，產生 Dashboard、Markdown、CSV、JSON、狀態及策略涵蓋率；五個 `latest` 產物採整組原子更新，失敗時保留上一個成功版本。
+- 實際以本機資料執行成功，產生 1,000 筆 JSON／CSV 策略結果；目前狀態為 `experimental`、成熟度為 `insufficient_data`，僅能作為研究參考。發布結果未發現 `api_key`、`offer_id`、`event_id`、`raw_payload` 或私有寫入端點。
+- Task 9B 已新增 preview-first Windows 安裝腳本與操作文件；`BitfinexP0StrategyAnalysis` 已註冊並啟用，每天台灣本機時間 10:00 以 `pythonw.exe` 靜默執行，採 `IgnoreNew`、`StartWhenAvailable` 與 30 分鐘上限。
+- 排程已手動觸發驗收，結果為 `LastTaskResult=0`，五個正式輸出及 `data/metadata/p0_strategy_status.json` 均成功更新；下次排定執行為 2026-09-02 10:00。
+- Task 9A／9B commits 分別為 `23fbc3c`、`c6e54e1`；合併後完整離線測試為 `367 passed, 1 deselected`。
+- 下一步停在 P0 Task 10：核對 CSV／JSON／Markdown／Dashboard 的同一策略數字、重跑 production path 與隱私檢查，更新專案交接紀錄；本次暫停不開始 Task 10。
+
 ## 2026-08-31 P0 Task 8 正式唯讀 Dashboard 完成
 
 - 新增 `bitfinex_lending/p0_dashboard.py`，由 Task 7 的 `dashboard_data.json` 產生獨立 `dashboard.html`；既有實驗 Dashboard 2.1 保留不覆蓋。

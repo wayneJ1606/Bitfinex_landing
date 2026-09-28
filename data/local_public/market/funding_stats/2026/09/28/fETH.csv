@@ -1,0 +1,3 @@
+collected_at,market,mts,frr,avg_period,funding_amount,funding_amount_used,funding_below_threshold,payload_json
+2026-09-28T00:47:02.998260+00:00,fETH,1790553900000,7.6e-07,35.19,10802.18594604,10799.2508779,9496.11159721,"[1790553900000, null, null, 7.6e-07, 35.19, null, null, 10802.18594604, 10799.2508779, null, null, 9496.11159721, null, null, null, null, null, null, null, null, null, null, null, null]"
+2026-09-28T01:47:03.357985+00:00,fETH,1790557500000,7.6e-07,35.03,10805.01386798,10802.07879984,8950.90909586,"[1790557500000, null, null, 7.6e-07, 35.03, null, null, 10805.01386798, 10802.07879984, null, null, 8950.90909586, null, null, null, null, null, null, null, null, null, null, null, null]"

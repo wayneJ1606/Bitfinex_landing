@@ -1,5 +1,13 @@
 # Bitfinex 放貸市場決策輔助系統進度紀錄
 
+## 2026-10-12 P0 Task 10 production path 與交接驗證完成
+
+- 以本機實際資料執行 `.venv\Scripts\python.exe -m bitfinex_lending.p0_strategy_pipeline` 成功，產生 1,000 筆策略結果；狀態正確維持 `experimental`，成熟度為 `insufficient_data`，沒有誤標為正式建議。
+- 抽查 1,000 USDT 的 `optimized_without_prediction` / `highest_return` 策略，CSV、JSON、Markdown 與 Dashboard 的策略識別、`net_interest=4.751764427846421850211868651` 及 `ending_capital=1004.751764427846421850211869` 完全一致。
+- 掃描所有正式發布產物與狀態檔，未發現 `api_key`、`offer_id`、`event_id`、`raw_payload` 或 `/auth/w/`。
+- 完整離線測試為 `367 passed, 1 deselected in 46.26s`；被排除的是設定中的 live integration test。
+- USDT 目前有 1,187 個可用每小時觀測，從 2026-08-24 02:00 UTC 至 2026-10-12 12:00 UTC，跨度 1,186 小時（約 49.4 天），完整率 100%、最大缺口 1 小時，每個策略組合至少 1,163 次可驗證機會。功能驗證已完成，但正式結論仍須等待 60 天連續歷史及完整 walk-forward 門檻。
+
 ## 2026-09-01 P0 Task 9 手動分析管線與每日排程完成
 
 - Task 9A 已新增 `bitfinex_lending/p0_strategy_pipeline.py`，可手動讀取本機公開市場資料與可選的私人衍生統計，產生 Dashboard、Markdown、CSV、JSON、狀態及策略涵蓋率；五個 `latest` 產物採整組原子更新，失敗時保留上一個成功版本。

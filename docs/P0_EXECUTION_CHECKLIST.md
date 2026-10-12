@@ -1,6 +1,6 @@
 # P0 業師建議版執行清單
 
-最後更新：2026-09-01
+最後更新：2026-10-12
 
 本文件是 P0 的可勾選進度入口。需求與完成定義以 [`P0 放貸策略最佳化設計`](superpowers/specs/2026-08-19-p0-funding-strategy-optimizer-design.md) 為準；逐檔案、逐測試的執行順序以 [`P0 Funding Strategy Optimizer Implementation Plan`](superpowers/plans/2026-08-22-p0-funding-strategy-optimizer.md) 為準。`todo.md` 只維護上層目標，`progress.md` 只新增已驗證里程碑。
 
@@ -26,7 +26,7 @@
 - [x] Task 7：原子輸出 Markdown、CSV、JSON、狀態與保留上一版結果（commit `51dd586`；8 focused tests passed）
 - [x] Task 8：建立讀取 Task 7 統一結果的正式本機唯讀互動介面（commit `55c0b0a`；13 focused integration tests passed）
 - [x] Task 9：建立每日台灣時間 10:00 分析管線與排程（Task 9A commit `23fbc3c`；Task 9B commit `c6e54e1`；合併後 `367 passed, 1 deselected`；排程手動驗收 `LastTaskResult=0`）
-- [ ] Task 10：執行 production path、完整測試、隱私檢查及文件交接
+- [x] Task 10：執行 production path、完整測試、隱私檢查及文件交接（production status `experimental`；跨格式抽查一致；敏感詞無命中；`367 passed, 1 deselected`）
 
 ## C. 正式資料成熟度（與功能完成分開）
 
@@ -39,11 +39,11 @@
 
 > 功能可以在資料累積期間先完成。C 節未全部通過時，介面與報告只能顯示「實驗結果／資料不足」，不得宣稱正式最佳策略。
 
-截至 2026-08-30，USDT 公開特徵資料為 282／1,440 小時（約 19.6%）；`fUST` funding-book 修正後連續成功 149 次。這些數字足以產生實驗候選策略，但尚未通過本節正式資料成熟度。
+截至 2026-10-12，USDT 有 1,187 個完整每小時觀測，跨度 1,186 小時（約 49.4 天），完整率 100%、最大缺口 1 小時，每策略至少有 1,163 次觀察機會。目前仍未達 60 天門檻，因此產物繼續標示 `experimental`，不宣稱正式最佳策略。
 
 ## D. 下一次續作入口
 
-1. 從實作計畫 Task 10 開始，執行 production path、跨格式數字一致性、完整測試與隱私檢查。
-2. 將 Task 10 的實際測試數、狀態、限制及下一個資料成熟度檢查點寫回 `progress.md`、`todo.md` 與本清單。
+1. 繼續每日產生實驗結果，並在 USDT 連續歷史達 60 天後重跑 production path 與 walk-forward 驗證。
+2. 目前有效歷史起點為 2026-08-24 02:00 UTC；若後續不中斷，下一個 60 天檢查點為 2026-10-23 02:00 UTC（台灣時間 10:00）。
 3. 不因資料尚未滿 60 天而停止文件與結案報告整理；正式策略結論仍須等待 C 節門檻。
-4. Task 9 排程已啟用；下次續作先確認 `BitfinexP0StrategyAnalysis` 最近結果為成功，再進行 Task 10。
+4. 下一階段可進入結案報告修正與 Git 成果整理，但仍要把正式資料成熟度與功能完成度分開記錄。

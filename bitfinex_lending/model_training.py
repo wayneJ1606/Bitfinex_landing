@@ -7,6 +7,7 @@ from typing import Sequence
 import warnings
 
 from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 from bitfinex_lending.models import (
@@ -38,6 +39,25 @@ PREDICTOR_FIELDS = (
 
 class ModelTrainingError(ValueError):
     """Raised when trustworthy model evaluation cannot be produced."""
+
+
+def _xgboost_estimator():
+    """Return a deterministic XGBoost estimator when the optional package exists."""
+    try:
+        from xgboost import XGBRegressor
+    except ImportError:
+        return None
+    return XGBRegressor(
+        n_estimators=100,
+        max_depth=3,
+        learning_rate=0.05,
+        subsample=0.9,
+        colsample_bytree=0.9,
+        objective="reg:squarederror",
+        random_state=42,
+        n_jobs=1,
+        verbosity=0,
+    )
 
 
 def _utc(value: str, field: str) -> tuple[datetime, str]:
@@ -166,6 +186,14 @@ def evaluate_models(
         }
         estimator = LinearRegression().fit(_matrix(train), train_targets)
         prediction_sets["linear_regression"] = estimator.predict(_matrix(validation)).tolist()
+        tree = DecisionTreeRegressor(
+            random_state=42, max_depth=5, min_samples_leaf=2
+        ).fit(_matrix(train), train_targets)
+        prediction_sets["decision_tree"] = tree.predict(_matrix(validation)).tolist()
+        xgb = _xgboost_estimator()
+        if xgb is not None:
+            xgb.fit(_matrix(train), train_targets)
+            prediction_sets["xgboost"] = xgb.predict(_matrix(validation)).tolist()
 
         for model_name, predicted in prediction_sets.items():
             evaluation, model_predictions = _evaluate_predictions(
@@ -185,7 +213,10 @@ def evaluate_models(
                 feature_rows=len(ordered),
                 valid_rows=len(eligible),
                 required_rows=required_rows,
-                message="evaluated baseline_mean, baseline_previous, and linear_regression",
+                message=(
+                    "evaluated " + ", ".join(prediction_sets)
+                    + ("; xgboost unavailable" if xgb is None else "")
+                ),
             )
         )
 

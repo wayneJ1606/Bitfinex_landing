@@ -6,6 +6,7 @@ import math
 
 import pytest
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import importlib.util
 
 from bitfinex_lending.model_training import ModelTrainingError, evaluate_models
 from bitfinex_lending.models import ModelingFeature
@@ -48,12 +49,15 @@ def test_threshold_and_market_isolation() -> None:
     status = trained.statuses[0]
     assert status.status == "trained"
     assert (status.feature_rows, status.valid_rows, status.required_rows) == (168, 168, 168)
-    assert {item.model_name for item in trained.evaluations} == {
+    expected_models = {
         "baseline_mean",
         "baseline_previous",
         "linear_regression",
+        "decision_tree",
     }
-
+    if importlib.util.find_spec("xgboost") is not None:
+        expected_models.add("xgboost")
+    assert {item.model_name for item in trained.evaluations} == expected_models
     insufficient = evaluate_models(_features(167), run_at=run_at)
     assert insufficient.statuses[0].status == "insufficient_data"
     assert insufficient.evaluations == ()
@@ -65,6 +69,13 @@ def test_threshold_and_market_isolation() -> None:
         ("fUSD", "trained"),
     ]
     assert {item.market for item in mixed.evaluations} == {"fUSD"}
+
+
+def test_decision_tree_predictions_are_finite() -> None:
+    result = evaluate_models(_features(168), run_at="2026-07-22T00:00:00Z")
+    predictions = [item for item in result.predictions if item.model_name == "decision_tree"]
+    assert len(predictions) == 34
+    assert all(math.isfinite(item.predicted_rate) for item in predictions)
 
 
 def test_models_share_chronological_validation_and_leakage_safe_baselines() -> None:

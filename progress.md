@@ -1,5 +1,52 @@
 # Bitfinex 放貸市場決策輔助系統進度紀錄
 
+## 2026-10-12 P0 Task 10 production path 與交接驗證完成
+
+- 以本機實際資料執行 `.venv\Scripts\python.exe -m bitfinex_lending.p0_strategy_pipeline` 成功，產生 1,000 筆策略結果；狀態正確維持 `experimental`，成熟度為 `insufficient_data`，沒有誤標為正式建議。
+- 抽查 1,000 USDT 的 `optimized_without_prediction` / `highest_return` 策略，CSV、JSON、Markdown 與 Dashboard 的策略識別、`net_interest=4.751764427846421850211868651` 及 `ending_capital=1004.751764427846421850211869` 完全一致。
+- 掃描所有正式發布產物與狀態檔，未發現 `api_key`、`offer_id`、`event_id`、`raw_payload` 或 `/auth/w/`。
+- 完整離線測試為 `367 passed, 1 deselected in 46.26s`；被排除的是設定中的 live integration test。
+- USDT 目前有 1,187 個可用每小時觀測，從 2026-08-24 02:00 UTC 至 2026-10-12 12:00 UTC，跨度 1,186 小時（約 49.4 天），完整率 100%、最大缺口 1 小時，每個策略組合至少 1,163 次可驗證機會。功能驗證已完成，但正式結論仍須等待 60 天連續歷史及完整 walk-forward 門檻。
+
+## 2026-09-01 P0 Task 9 手動分析管線與每日排程完成
+
+- Task 9A 已新增 `bitfinex_lending/p0_strategy_pipeline.py`，可手動讀取本機公開市場資料與可選的私人衍生統計，產生 Dashboard、Markdown、CSV、JSON、狀態及策略涵蓋率；五個 `latest` 產物採整組原子更新，失敗時保留上一個成功版本。
+- 實際以本機資料執行成功，產生 1,000 筆 JSON／CSV 策略結果；目前狀態為 `experimental`、成熟度為 `insufficient_data`，僅能作為研究參考。發布結果未發現 `api_key`、`offer_id`、`event_id`、`raw_payload` 或私有寫入端點。
+- Task 9B 已新增 preview-first Windows 安裝腳本與操作文件；`BitfinexP0StrategyAnalysis` 已註冊並啟用，每天台灣本機時間 10:00 以 `pythonw.exe` 靜默執行，採 `IgnoreNew`、`StartWhenAvailable` 與 30 分鐘上限。
+- 排程已手動觸發驗收，結果為 `LastTaskResult=0`，五個正式輸出及 `data/metadata/p0_strategy_status.json` 均成功更新；下次排定執行為 2026-09-02 10:00。
+- Task 9A／9B commits 分別為 `23fbc3c`、`c6e54e1`；合併後完整離線測試為 `367 passed, 1 deselected`。
+- 下一步停在 P0 Task 10：核對 CSV／JSON／Markdown／Dashboard 的同一策略數字、重跑 production path 與隱私檢查，更新專案交接紀錄；本次暫停不開始 Task 10。
+
+## 2026-08-31 P0 Task 8 正式唯讀 Dashboard 完成
+
+- 新增 `bitfinex_lending/p0_dashboard.py`，由 Task 7 的 `dashboard_data.json` 產生獨立 `dashboard.html`；既有實驗 Dashboard 2.1 保留不覆蓋。
+- 介面提供 1,000～10,000 USDT 本金、USDT／BTC／ETH、2／5／10／30 天期限及 1／3／6／12／24 小時等待條件，並呈現最高收益、較穩定方案及簡單基準比較。
+- 介面完全離線唯讀，不呼叫 API、不包含下單功能；嵌入 JSON 會安全編碼，並顯示實驗成熟度、最後成功時間、更新錯誤與超過 48 小時的資料過期警示。
+- Task 8 commit 為 `55c0b0a`；Task 7／8 專項整合測試 `13 passed`，合併後完整測試 `356 passed, 1 deselected`。
+- Codex 內建瀏覽器當時沒有可用分頁，因此尚未留下畫面截圖；HTML 產生、資料合約、離線限制與安全行為均已有自動測試。
+- 下一步為 P0 Task 9：建立每日分析管線與台灣時間 10:00 的 preview-first Windows 排程。
+
+## 2026-08-31 P0 Task 7 統一輸出完成
+
+- 新增 `bitfinex_lending/p0_strategy_output.py`，由同一份經過清理的策略資料原子產生 `strategy_results.csv`、`report.md`、`dashboard_data.json` 與 `status.json`。
+- 僅在四個檔案全部寫入並重新驗證成功後更新 `latest`；寫入失敗時保留上一個成功版本，避免 Dashboard 讀到半套或損壞資料。
+- 遞迴阻擋 `api_key`、`offer_id`、`event_id`、`raw_payload` 等私人或識別欄位，並將非正式成熟度一律標示為 `experimental`。
+- Task 7 commit 為 `51dd586`；專項測試 `8 passed`，合併後完整測試 `351 passed, 1 deselected`。
+- 下一步為 P0 Task 8：讀取 `dashboard_data.json` 產生正式本機唯讀 Dashboard，不修改既有實驗 Dashboard 2.1。
+
+## 2026-08-30 專案盤點、Dashboard 2.1 與資料更新
+
+- 限定 P0 稽核發現執行清單落後於實際程式：Task 2 官方計息與資金網格、Task 3 小時市場標準化與成熟度判定其實已分別由 commits `a2a0c5e`、`3ab21f6`／`f3044a5` 完成。重跑 Task 2／3、舊版固定基準與實驗 Dashboard 相關測試為 `72 passed`；第一個真正未完成的正式任務改為 Task 4。
+- 已依最初《專案企劃書：Bitfinex 放貸決策輔助系統（現實可用版）》確認正式結案報告的 11 章架構、撰寫順序與完成證據；後續統一依 [`docs/FINAL_REPORT_OUTLINE.md`](docs/FINAL_REPORT_OUTLINE.md) 逐章建立。
+- 公開與私人本機收集器持續運作；截至 2026-08-30 15:51（台灣時間），公開資料最新成功時間為 15:47，私人帳戶資料最新寫入時間為 15:50。
+- `fUST` funding-book 每日 CSV 寫入修正後已連續成功 149 次、失敗 0 次。USDT 公開特徵資料為 282／1,440 小時（約 19.6%），尚未達 60 天正式門檻。
+- 目前可產生 100 組 USDT 實驗候選策略，每組約 234～257 筆觀察；成交結果仍是公開市場代理值，可信度必須維持「非常低」。
+- 已新增獨立的 `dashboard_readable_zh_v2_1.html`：移除原生資產理論收益，只保留 USDT 本金與 2／5／10／30 天策略比較，並為每個天數補列快速成交與中位利率基準。舊版 Dashboard 均保留。
+- Dashboard 2.1 已提交於本機分支，commit `6faee23`、`eec611b`；合併回目前工作區後完整測試為 `311 passed, 1 deselected`。
+- 2026-08-30 已將 257 個本機公開資料檔（5,713,651 bytes）同步至 GitHub `master`，commit `9fb64a1`；`data/account/`、API 憑證及私人識別資料均未同步。
+- 已完成 Git 安全盤點：目前待整理內容分為正式程式／測試、文件及可重建模型產出；私人資料仍受 `.gitignore` 保護。五個不影響 P0／P1 的重複 worktree 已移除，相關 Git 分支保留；測試影片與 Windows 備援 worktree 因仍有未提交內容而保留。
+- P0 功能可在資料累積期間繼續實作；目前優先項目為官方計息規則、正式資料標準化、成交統計、拆單最佳化、walk-forward、統一輸出及每日分析排程。資料未成熟前，結案報告只能使用明確標示限制的實驗結果。
+
 ## 2026-08-24 GitHub 公開資料分流與同步完成
 
 - GitHub Actions 公開 funding-book 保留於 `data/raw/`；本機公開收集器已改寫入 `data/local_public/raw/` 與 `data/local_public/market/`，兩個來源不再共同修改同一批 CSV。
@@ -80,7 +127,7 @@
 ## 2026-08-16 新增策略最佳化目標
 
 - 新增 [strategy_optimization_goals.md](strategy_optimization_goals.md)，將下一階段拆成「策略收益比較器」與「成交機率模型」。
-- 新目標會比較 160 USDT、10,000 USDT、利率、期限、成交機率、資金利用率與預期本金＋利息總和。
+- 當時的新目標原訂比較 160 USDT 與 10,000 USDT；此舊本金設定已於 2026-08-19 由 P0 權威設計正式改為 1,000～10,000 USDT 十個級距。
 - 目前尚未有完整的歷史掛單／成交／取消資料，因此成交機率仍不能宣稱為真實成交機率。
 - 幣價上漲／下跌預測與自動下單明確排除在本階段之外。
 
@@ -380,4 +427,4 @@ GitHub 遠端驗收：
 - [x] Funding 資料本機儲存與去重
 - [x] 私有 Funding collector 串接
 - [x] 本機憑證讀取與 `--dry-run`
-- [x] 排程安裝腳本（預覽模式；尚未啟用）
+- [x] 排程安裝腳本已完成、啟用並通過持續收集驗證

@@ -48,6 +48,21 @@ data/local_public/**/*.lock
 # Disposable test synchronization workspaces
 .test-tmp-sync-*/
 
+# Disposable local tooling
+.codex_tmp/
+
+# Local operational access notes
+cloudflare tunnel 的相關資訊.txt
+
+# Atomic private-data/status temporary files
+data/metadata/account_collector_status.json.tmp
+data/metadata/private_collection_status.json.tmp
+data/metadata/collector_runs/**/private.csv.tmp
+data/modeling/p0_aligned_private_market.csv.tmp
+data/modeling/p0_offer_lifecycle.csv.tmp
+data/modeling/p0_offer_trade_matches.csv.tmp
+data/modeling/p0_fixed_baselines.csv.tmp
+
 # Editor and operating-system files
 .vscode/
 .idea/

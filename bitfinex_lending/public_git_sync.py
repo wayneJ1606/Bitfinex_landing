@@ -111,6 +111,8 @@ def _run(cwd: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
         check=True,
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         shell=False,
     )
 
@@ -163,12 +165,14 @@ def synchronize(
             raise SyncError("origin remote is unavailable")
         with tempfile.TemporaryDirectory(prefix="bitfinex-public-sync-") as temporary:
             checkout = Path(temporary) / "repository"
-            subprocess.run(
-                ["git", "clone", "--branch", branch, "--single-branch", remote_url, str(checkout)],
-                check=True,
-                capture_output=True,
-                text=True,
-                shell=False,
+            _run(
+                Path(temporary),
+                "clone",
+                "--branch",
+                branch,
+                "--single-branch",
+                remote_url,
+                str(checkout),
             )
             for source in files:
                 relative = source.relative_to(project_root)

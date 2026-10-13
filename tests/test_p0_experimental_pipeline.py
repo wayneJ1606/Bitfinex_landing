@@ -40,11 +40,19 @@ def test_pipeline_publishes_canonical_json_and_dashboard_without_private_inputs(
     assert summary.status == "experimental"
     assert summary.json_path == output / "dashboard_data.json"
     assert summary.dashboard_path == output / "dashboard.html"
+    assert summary.readable_dashboard_path == output / "dashboard_readable_zh.html"
+    assert summary.dashboard_v2_1_path == output / "dashboard_readable_zh_v2_1.html"
     payload = json.loads(summary.json_path.read_text(encoding="utf-8"))
     assert payload["read_only"] is True
     assert payload["automatic_trading"] is False
     assert payload["scenarios"]
     assert "1001.7" in summary.dashboard_path.read_text(encoding="utf-8")
+    readable_html = summary.readable_dashboard_path.read_text(encoding="utf-8")
+    assert "使用限制" in readable_html
+    assert summary.dashboard_path.read_text(encoding="utf-8") != readable_html
+    dashboard_v2_1_html = summary.dashboard_v2_1_path.read_text(encoding="utf-8")
+    assert "USDT 放貸候選策略" in dashboard_v2_1_html
+    assert 'id="asset"' not in dashboard_v2_1_html
     assert not list(output.glob("*.tmp"))
 
 
@@ -57,6 +65,8 @@ def test_cli_defaults_to_source_separated_local_market_data(monkeypatch) -> None
             status="experimental",
             json_path=Path("dashboard_data.json"),
             dashboard_path=Path("dashboard.html"),
+            readable_dashboard_path=Path("dashboard_readable_zh.html"),
+            dashboard_v2_1_path=Path("dashboard_readable_zh_v2_1.html"),
         )
 
     monkeypatch.setattr(pipeline, "run_experimental_pipeline", fake_run)

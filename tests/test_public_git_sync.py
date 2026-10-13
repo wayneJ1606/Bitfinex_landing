@@ -5,12 +5,30 @@ import subprocess
 
 import pytest
 
+import bitfinex_lending.public_git_sync as public_git_sync
 from bitfinex_lending.public_git_sync import (
     SyncError,
     collect_public_files,
     push_with_retries,
     synchronize,
 )
+
+
+def test_git_command_output_uses_utf8_instead_of_windows_locale(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    options: dict[str, object] = {}
+
+    def fake_run(*args: object, **kwargs: object) -> subprocess.CompletedProcess[str]:
+        options.update(kwargs)
+        return subprocess.CompletedProcess(args[0], 0, stdout="", stderr="")
+
+    monkeypatch.setattr(public_git_sync.subprocess, "run", fake_run)
+
+    public_git_sync._run(tmp_path, "status")
+
+    assert options["encoding"] == "utf-8"
+    assert options["errors"] == "replace"
 
 
 def _write(path: Path, content: str = "market,rate\nfUST,0.0002\n") -> None:
@@ -20,7 +38,13 @@ def _write(path: Path, content: str = "market,rate\nfUST,0.0002\n") -> None:
 
 def _git(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        ["git", *args], cwd=cwd, check=True, capture_output=True, text=True
+        ["git", *args],
+        cwd=cwd,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
     )
 
 
@@ -92,6 +116,8 @@ def test_synchronizes_to_local_remote_and_second_run_is_noop(tmp_path: Path) -> 
         check=True,
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     assert "fUST" in shown.stdout
     tree = subprocess.run(
@@ -99,5 +125,7 @@ def test_synchronizes_to_local_remote_and_second_run_is_noop(tmp_path: Path) -> 
         check=True,
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
     ).stdout.splitlines()
     assert "data/account/funding_trades/2026/08/16.csv" not in tree

@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from bitfinex_lending import modeling
+from bitfinex_lending.backtesting import BacktestError
 from bitfinex_lending.models import ModelStatus, ModelingResult
 from bitfinex_lending.modeling import ModelingRunSummary, ModelingSettings
 from bitfinex_lending.raw_csv import RawCsvError
@@ -109,6 +110,8 @@ def test_main_reports_insufficient_data_and_all_output_paths(
     [
         OSError("disk full"),
         RawCsvError("bad raw data"),
+        BacktestError("bad prediction"),
+        RuntimeError("failed to export report"),
     ],
 )
 def test_main_returns_one_and_prints_fatal_for_expected_errors(

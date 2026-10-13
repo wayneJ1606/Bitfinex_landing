@@ -1,5 +1,12 @@
 # Bitfinex 放貸市場決策輔助系統進度紀錄
 
+## 2026-10-13 遠端公開資料歷史整合候選完成
+
+- 以最新 `origin/master`（`0f9902c`）為公開資料基準，在隔離 worktree 合併 local `master`（`7dedbf4`），建立雙親候選提交 `b5e5aed`。
+- 57 個衝突依所有權處理：`data/raw` 與既有模型輸出採遠端版本；程式碼、測試、完成紀錄及 `.gitignore` 私密資料保護採本機新版。
+- 隱私合約測試為 `2 passed`；完整離線測試為 `372 passed, 1 deselected in 58.94s`，沒有警告。
+- 第二次 fetch 後遠端未再前進；候選分支 `codex/remote-master-reconciliation-20261012` 相對 `origin/master` 為 74 ahead、0 behind。目前僅保留本機，尚未 push。
+
 ## 2026-10-12 P0 Task 10 production path 與交接驗證完成
 
 - 以本機實際資料執行 `.venv\Scripts\python.exe -m bitfinex_lending.p0_strategy_pipeline` 成功，產生 1,000 筆策略結果；狀態正確維持 `experimental`，成熟度為 `insufficient_data`，沒有誤標為正式建議。

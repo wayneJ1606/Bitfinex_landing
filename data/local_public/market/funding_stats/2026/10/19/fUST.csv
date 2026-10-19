@@ -1,0 +1,3 @@
+collected_at,market,mts,frr,avg_period,funding_amount,funding_amount_used,funding_below_threshold,payload_json
+2026-10-19T00:47:03.164977+00:00,fUST,1792368300000,7.5e-07,72.51,480657904.2213428,384493820.1740056,121212522.20789824,"[1792368300000, null, null, 7.5e-07, 72.51, null, null, 480657904.2213428, 384493820.1740056, null, null, 121212522.20789824, null, null, null, null, null, null, null, null, null, null, null, null]"
+2026-10-19T01:47:02.909020+00:00,fUST,1792371900000,7.5e-07,71.43,481966289.42300034,385795183.4063288,119767065.72418539,"[1792371900000, null, null, 7.5e-07, 71.43, null, null, 481966289.42300034, 385795183.4063288, null, null, 119767065.72418539, null, null, null, null, null, null, null, null, null, null, null, null]"

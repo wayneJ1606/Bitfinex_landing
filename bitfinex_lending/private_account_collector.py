@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import json
-import msvcrt
 import os
 import threading
 import time
@@ -23,6 +22,7 @@ from .private_client import (
     ReadOnlyBitfinexClient,
 )
 from .collector_run_history import CollectorRunRecord, append_collector_run
+from .platform_file_lock import try_lock, unlock
 
 
 class PrivateClientLike(Protocol):
@@ -223,11 +223,10 @@ def _acquire_lock(path: Path) -> _HeldCollectorLock:
     try:
         path.touch(exist_ok=True)
         handle = path.open("r+", encoding="utf-8")
-        if handle.seek(0, os.SEEK_END) == 0:
-            handle.write("0")
-            handle.flush()
-        handle.seek(0)
-        msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+        if not try_lock(handle):
+            handle.close()
+            thread_lock.release()
+            raise RuntimeError("private collector is already running")
         handle.seek(0)
         handle.truncate()
         json.dump({"pid": os.getpid()}, handle)
@@ -244,8 +243,7 @@ def _acquire_lock(path: Path) -> _HeldCollectorLock:
 
 def _release_lock(lock: _HeldCollectorLock) -> None:
     try:
-        lock.handle.seek(0)
-        msvcrt.locking(lock.handle.fileno(), msvcrt.LK_UNLCK, 1)
+        unlock(lock.handle)
     finally:
         try:
             lock.handle.close()

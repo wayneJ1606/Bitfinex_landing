@@ -6,8 +6,7 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from time import sleep
-from typing import BinaryIO, Callable, Iterator, Protocol, Sequence
-import msvcrt
+from typing import Callable, Iterator, Protocol, Sequence
 import threading
 
 from .client import ClientError
@@ -19,6 +18,7 @@ from .market_collector import FUNDING_MARKETS, MarketClient, collect_market_data
 from .models import FundingBookRow, MarketResult, RunSummary
 from .runner import run_collection
 from .collector_run_history import CollectorRunRecord, append_collector_run
+from .platform_file_lock import try_lock as _try_lock, unlock as _unlock
 
 
 def local_public_settings() -> Settings:
@@ -92,28 +92,6 @@ def _exclusive_lock(path: Path) -> Iterator[bool]:
     finally:
         with _held_lock_paths_guard:
             _held_lock_paths.discard(normalized_path)
-
-
-def _try_lock(handle: BinaryIO) -> bool:
-    try:
-        handle.seek(0)
-        if not handle.read(1):
-            handle.seek(0)
-            handle.write(b"0")
-            handle.flush()
-        handle.seek(0)
-        msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
-    except OSError:
-        return False
-    return True
-
-
-def _unlock(handle: BinaryIO) -> None:
-    try:
-        handle.seek(0)
-        msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
-    except OSError:
-        pass
 
 
 def run_stable_collection(

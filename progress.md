@@ -10,6 +10,8 @@
 - GitHub 每日 scheduled modeling workflow 已觀察到成功排程執行（run `40234085591`）。本機每週公開資料同步於 2026-10-26 10:00 曾留下 `CalledProcessError`，但後續以同樣的完整 clone、1,283 個公開檔同步流程及 GitHub `push --dry-run` 重現均成功，判定較可能是當時的暫時連線問題；經使用者同意後已重新執行並一次成功，遠端 `master` 為 commit `b4f11a9`。遠端 commit 共變更 145 個檔案，全部位於 `data/local_public/raw/`、`market/` 或 `metadata/` 白名單，沒有 `data/account/` 私人路徑。
 - 依使用者指示，結案報告的最終 DOCX／PDF 產生與逐頁校對延後處理；本次先完成專案本體與驗證。
 - 已在安全分支建立三個本機 checkpoint：`df4a081` 保存一鍵完整更新流程與測試、`6ff5a57` 保存正式模型／回測／最佳化策略與 Dashboard 輸出、`aa1cc7f` 保存報告與簡報產生工具。公開原始資料仍由白名單同步管線管理；私人資料、執行狀態、DOCX／PDF／PPTX 與逐頁預覽不納入這批 Git 提交。
+- 每日 10:00 本機排程原本只執行最佳化策略管線，未先重建本機模型。已採最小修改設計，保留原工作名稱與排程條件，改由隱藏的 PowerShell 執行 `scripts/run-final-refresh.ps1`，使更新順序固定為模型 → 策略 → Dashboard；排程合約與一鍵更新專項測試為 `4 passed`。
+- 已更新並啟用既有 `BitfinexP0StrategyAnalysis` 工作，完整測試為 `374 passed, 1 deselected in 45.50s`。2026-10-26 11:14 手動觸發後 `LastTaskResult=0`，模型評估、正式策略狀態與 Dashboard 均取得較新的修改時間；策略狀態維持 `formal`、結果 1,400 筆，下次排程為 2026-10-27 10:00（台灣時間）。
 
 ## 2026-10-12 P0 Task 10 production path 與交接驗證完成
 

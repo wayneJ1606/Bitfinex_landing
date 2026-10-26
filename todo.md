@@ -16,6 +16,13 @@
 
 > 功能與準備版報告均已完成；最新正式重建數字以 2026-10-26 為準，60 天資料門檻與正式 walk-forward 已完成，最終報告輸出依使用者指示延後處理。
 
+## 2026-10-26 每日完整更新
+
+- [x] 確認原每日 10:00 排程只更新最佳化策略與 Dashboard，未先重建本機模型
+- [x] 以測試先行方式將排程入口改為 `scripts/run-final-refresh.ps1`
+- [x] 保留原工作名稱、每日 10:00、隱藏執行、`IgnoreNew`、`StartWhenAvailable` 與 30 分鐘上限
+- [x] 更新既有 Windows 排程並手動觸發一次完整驗收（2026-10-26 11:14，`LastTaskResult=0`）
+
 ## 2026-08-24 GitHub 同步成果
 
 - [x] 保留 GitHub Actions `data/raw/`，將本機公開資料分流至 `data/local_public/`

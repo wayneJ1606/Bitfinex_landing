@@ -1,13 +1,21 @@
-# P0 放貸策略分析操作說明
+# 最佳化放貸策略分析操作說明
 
-本工具讀取本機既有的公開市場資料與可選的私人衍生統計，產生 P0 策略比較結果。它不呼叫 Bitfinex 私有寫入 API、不會建立或取消掛單，也不會自動投資。
+本工具讀取本機既有的公開市場資料與可選的私人衍生統計，產生最佳化策略比較結果。它不呼叫 Bitfinex 私有寫入 API、不會建立或取消掛單，也不會自動投資。
 
 ## 手動更新
+
+只重新執行最佳化策略與 Dashboard：
 
 在專案根目錄執行：
 
 ```powershell
 python -m bitfinex_lending.p0_strategy_pipeline
+```
+
+依序重建本機模型、最佳化策略與 Dashboard：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run-final-refresh.ps1 -ProjectRoot . -PythonPath .\.venv\Scripts\python.exe
 ```
 
 成功後會更新：
@@ -36,7 +44,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install-p0-strategy-analysis.
 powershell -ExecutionPolicy Bypass -File .\scripts\install-p0-strategy-analysis.ps1 -ProjectRoot . -Enable
 ```
 
-排程名稱是 `BitfinexP0StrategyAnalysis`，每天依 Windows 本機時間 10:00 執行。它使用 `pythonw.exe` 靜默運行、同一時間只允許一個實例、錯過時間後可補跑，單次最長執行 30 分鐘。電腦關機時不會執行，之後開機且使用者登入時由 Windows 依 `StartWhenAvailable` 規則補跑。
+排程名稱沿用 `BitfinexP0StrategyAnalysis`，每天依 Windows 本機時間 10:00 執行。它以隱藏的 PowerShell 依序重建本機模型、最佳化策略與 Dashboard；同一時間只允許一個實例、錯過時間後可補跑，單次最長執行 30 分鐘。電腦關機時不會執行，之後開機且使用者登入時由 Windows 依 `StartWhenAvailable` 規則補跑。
 
 ## 狀態說明
 

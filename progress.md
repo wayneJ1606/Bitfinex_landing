@@ -4,7 +4,7 @@
 
 - fUST 公開資料已累積 1,512 筆每小時觀測，時間範圍為 2026-08-24 02:00 UTC 至 2026-10-26 01:00 UTC，跨度 1,511 小時（62.96 天）、完整率 100%、最長缺口 1 小時；100 種策略組合各有至少 1,489 次驗證機會，正式資料門檻已全部達成。
 - 已執行 `scripts/run-final-refresh.ps1`，重建四市場特徵、五種模型評估、預測、回測、決策支援、最佳化策略與唯讀 Dashboard；策略狀態為 `formal`，產生 1,400 筆結果。
-- 最佳模型皆為前一期基準；fBTC／fETH／fUSD／fUST 的最佳 R² 分別為 -0.1423、-0.0151、0.7676、0.8938。這表示 fUSD 與 fUST 的短期延續性較明顯，複雜模型目前仍未提供一致增益。
+- 合併兩個公開來源後，四市場最佳模型仍皆為前一期基準；fBTC／fETH／fUSD／fUST 的最佳 R² 分別為 0.1331、0.0886、0.7658、0.8949。fBTC 與 fETH 因補入較早的 GitHub 歷史而由負值改善為小幅正值，fUSD 與 fUST 的短期延續性仍較明顯，複雜模型目前仍未提供一致增益。
 - 以 1,000 USDT、2 天、等待上限 1 小時為例，最佳化含／未含預測與 FRR 的估計淨利同為 4.749238904918244691778921212 USDT；正式驗證仍未顯示預測策略優於 FRR。
 - CSV 與 Dashboard JSON 均為 1,400 筆；抽查同一策略的 `net_interest` 與 `ending_capital` 完全一致。完整離線測試為 `374 passed, 1 deselected in 53.48s`。
 - GitHub 每日 scheduled modeling workflow 已觀察到成功排程執行（run `40234085591`）。本機每週公開資料同步於 2026-10-26 10:00 曾留下 `CalledProcessError`，但後續以同樣的完整 clone、1,283 個公開檔同步流程及 GitHub `push --dry-run` 重現均成功，判定較可能是當時的暫時連線問題；經使用者同意後已重新執行並一次成功，遠端 `master` 為 commit `b4f11a9`。遠端 commit 共變更 145 個檔案，全部位於 `data/local_public/raw/`、`market/` 或 `metadata/` 白名單，沒有 `data/account/` 私人路徑。
@@ -13,7 +13,7 @@
 - 每日 10:00 本機排程原本只執行最佳化策略管線，未先重建本機模型。已採最小修改設計，保留原工作名稱與排程條件，改由隱藏的 PowerShell 執行 `scripts/run-final-refresh.ps1`，使更新順序固定為模型 → 策略 → Dashboard；排程合約與一鍵更新專項測試為 `4 passed`。
 - 已更新並啟用既有 `BitfinexP0StrategyAnalysis` 工作，完整測試為 `374 passed, 1 deselected in 45.50s`。2026-10-26 11:14 手動觸發後 `LastTaskResult=0`，模型評估、正式策略狀態與 Dashboard 均取得較新的修改時間；策略狀態維持 `formal`、結果 1,400 筆，下次排程為 2026-10-27 10:00（台灣時間）。
 - 公開資料 GitHub 同步的失敗狀態已補上 `failed_stage`、Git `return_code`（若有）與實際推送 `attempts`；狀態檔不保存完整命令、遠端網址或 stderr。複製階段失敗與推送重試失敗的專項測試均已涵蓋。
-- 模型資料載入已改為本機公開資料優先、GitHub 公開資料補缺：以市場與 UTC 小時為單位選取完整快照，同來源同小時採最後一次有效快照，不混合不同 order book；原始 CSV 維持分離。真實資料驗收採用本機 6,586 個快照、GitHub 補入 774 個小時，共 283,614 筆來源列及 7,360 個特徵；本次兩來源沒有重疊小時，同來源重複小時捨棄 40 個較早快照。`source_merge_status.json` 不含資料列、run ID 或本機路徑，完整測試為 `380 passed, 1 deselected in 47.12s`；最佳化策略與 Dashboard 更新成功且維持 `formal`、1,400 筆結果。
+- 模型資料載入已改為本機公開資料優先、GitHub 公開資料補缺：以市場與 UTC 小時為單位選取完整快照，同來源同小時採最後一次有效快照，不混合不同 order book；原始 CSV 維持分離。真實資料驗收採用本機 6,590 個快照、GitHub 補入 774 個小時，共 283,769 筆來源列及 7,364 個特徵；本次兩來源沒有重疊小時，同來源重複小時捨棄 40 個較早快照。`source_merge_status.json` 不含資料列、run ID 或本機路徑，完整測試為 `380 passed, 1 deselected in 47.12s`；最佳化策略與 Dashboard 更新成功且維持 `formal`、1,400 筆結果。
 
 ## 2026-10-12 P0 Task 10 production path 與交接驗證完成
 

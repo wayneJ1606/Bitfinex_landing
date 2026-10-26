@@ -1,0 +1,13 @@
+{
+  "discarded_fallback_snapshots": 0,
+  "discarded_same_source_snapshots": 40,
+  "fallback_snapshots": 801,
+  "generated_at": "2026-10-26T04:14:02.681342+00:00",
+  "overlapping_hours": 0,
+  "primary_snapshots": 6603,
+  "schema_version": "raw-source-merge-v1",
+  "selected_fallback_snapshots": 774,
+  "selected_primary_snapshots": 6590,
+  "selected_rows": 283769,
+  "strategy": "primary_market_hour_else_fallback"
+}

@@ -16,7 +16,7 @@ P0 是業師建議的結案報告主線，重點是 USDT 放貸策略比較。P1
 
 ## 資料來源與儲存
 
-公開資料來自 Bitfinex API，包含 funding book、ticker、stats、candles 與 BTC/ETH 價格等資料。GitHub Actions 的公開原始資料保留在 `data/raw/`；本機公開收集器寫入 `data/local_public/`，避免兩個來源共同修改同一份 CSV。私人帳戶的唯讀事件放在 `data/account/`，永不同步到 GitHub。模型與回測輸出位於 `data/modeling/`，資料來源、時間與收集狀態放在 `data/metadata/`。
+公開資料來自 Bitfinex API，包含 funding book、ticker、stats、candles 與 BTC/ETH 價格等資料。GitHub Actions 的公開原始資料保留在 `data/raw/`；本機公開收集器寫入 `data/local_public/`，避免兩個來源共同修改同一份 CSV。兩來源只在模型載入階段以「本機同小時優先、GitHub 補缺」規則合併，原始檔維持分離。私人帳戶的唯讀事件放在 `data/account/`，永不同步到 GitHub。模型與回測輸出位於 `data/modeling/`，資料來源、時間與收集狀態放在 `data/metadata/`。
 
 公開收集器與私人收集器都由 Windows 工作排程器定時呼叫，平時不需要持續開著 PowerShell 視窗。公開資料可供業師從 GitHub 查核，私人資料只保留在本機作為後續校正依據。
 

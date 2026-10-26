@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import csv
+import json
 from pathlib import Path
 
 import pytest
@@ -8,7 +10,7 @@ from bitfinex_lending import modeling
 from bitfinex_lending.backtesting import BacktestError
 from bitfinex_lending.models import ModelStatus, ModelingResult
 from bitfinex_lending.modeling import ModelingRunSummary, ModelingSettings
-from bitfinex_lending.raw_csv import RawCsvError
+from bitfinex_lending.raw_csv import RAW_FIELDS, RawCsvError
 
 
 def _result() -> ModelingResult:
@@ -19,6 +21,16 @@ def _result() -> ModelingResult:
         evaluations=(),
         predictions=(),
     )
+
+
+def _write_raw(path: Path, run_id: str, fetched_at: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(RAW_FIELDS)
+        writer.writerow(
+            (run_id, "fUSD", "0.0002", "2", "1", "10", "offer", fetched_at)
+        )
 
 
 def test_pipeline_calls_each_boundary_in_order(tmp_path: Path) -> None:
@@ -75,6 +87,49 @@ def test_pipeline_calls_each_boundary_in_order(tmp_path: Path) -> None:
     assert summary.source_rows == 3
     assert summary.feature_rows == 2
     assert summary.result is result
+
+
+def test_pipeline_merges_primary_and_fallback_and_exports_safe_status(
+    tmp_path: Path,
+) -> None:
+    primary = tmp_path / "private-location" / "local"
+    fallback = tmp_path / "private-location" / "github"
+    output = tmp_path / "modeling"
+    _write_raw(
+        primary / "2026/07/21/fUSD.csv",
+        "local-secret-run-id",
+        "2026-07-21T10:55:00+00:00",
+    )
+    _write_raw(
+        fallback / "2026/07/21/fUSD.csv",
+        "github-secret-run-id",
+        "2026-07-21T11:40:00+00:00",
+    )
+
+    summary = modeling.run_modeling_pipeline(
+        primary,
+        output,
+        run_at="2026-07-22T00:00:00+00:00",
+        fallback_raw_root=fallback,
+    )
+
+    assert summary.source_rows == 2
+    assert summary.merge_status_path == output / "source_merge_status.json"
+    status_text = summary.merge_status_path.read_text(encoding="utf-8")
+    status = json.loads(status_text)
+    assert status["strategy"] == "primary_market_hour_else_fallback"
+    assert status["selected_primary_snapshots"] == 1
+    assert status["selected_fallback_snapshots"] == 1
+    assert status["selected_rows"] == 2
+    assert "private-location" not in status_text
+    assert "secret-run-id" not in status_text
+
+
+def test_default_modeling_settings_merge_local_primary_with_github_fallback() -> None:
+    settings = ModelingSettings()
+
+    assert settings.raw_root == Path("data/local_public/raw")
+    assert settings.fallback_raw_root == Path("data/raw")
 
 
 def test_main_reports_insufficient_data_and_all_output_paths(

@@ -13,6 +13,7 @@
 - 每日 10:00 本機排程原本只執行最佳化策略管線，未先重建本機模型。已採最小修改設計，保留原工作名稱與排程條件，改由隱藏的 PowerShell 執行 `scripts/run-final-refresh.ps1`，使更新順序固定為模型 → 策略 → Dashboard；排程合約與一鍵更新專項測試為 `4 passed`。
 - 已更新並啟用既有 `BitfinexP0StrategyAnalysis` 工作，完整測試為 `374 passed, 1 deselected in 45.50s`。2026-10-26 11:14 手動觸發後 `LastTaskResult=0`，模型評估、正式策略狀態與 Dashboard 均取得較新的修改時間；策略狀態維持 `formal`、結果 1,400 筆，下次排程為 2026-10-27 10:00（台灣時間）。
 - 公開資料 GitHub 同步的失敗狀態已補上 `failed_stage`、Git `return_code`（若有）與實際推送 `attempts`；狀態檔不保存完整命令、遠端網址或 stderr。複製階段失敗與推送重試失敗的專項測試均已涵蓋。
+- 模型資料載入已改為本機公開資料優先、GitHub 公開資料補缺：以市場與 UTC 小時為單位選取完整快照，同來源同小時採最後一次有效快照，不混合不同 order book；原始 CSV 維持分離。真實資料驗收採用本機 6,586 個快照、GitHub 補入 774 個小時，共 283,614 筆來源列及 7,360 個特徵；本次兩來源沒有重疊小時，同來源重複小時捨棄 40 個較早快照。`source_merge_status.json` 不含資料列、run ID 或本機路徑，完整測試為 `380 passed, 1 deselected in 47.12s`；最佳化策略與 Dashboard 更新成功且維持 `formal`、1,400 筆結果。
 
 ## 2026-10-12 P0 Task 10 production path 與交接驗證完成
 

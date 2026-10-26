@@ -15,7 +15,7 @@ if ([string]::IsNullOrWhiteSpace($PythonPath)) {
     $PythonPath = (Get-Command python -ErrorAction Stop).Source
 }
 $resolvedPython = (Resolve-Path -LiteralPath $PythonPath).Path
-$modelCode = "from pathlib import Path; from bitfinex_lending.modeling import main, ModelingSettings; raise SystemExit(main(ModelingSettings(raw_root=Path('data/local_public/raw'), output_root=Path('data/modeling'), required_rows=168)))"
+$modelCode = "from pathlib import Path; from bitfinex_lending.modeling import main, ModelingSettings; raise SystemExit(main(ModelingSettings(raw_root=Path('data/local_public/raw'), output_root=Path('data/modeling'), required_rows=168, fallback_raw_root=Path('data/raw'))))"
 
 Push-Location $resolvedRoot
 try {

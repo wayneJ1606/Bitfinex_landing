@@ -1272,23 +1272,163 @@
     },
     {
       "relative_path": "data/local_public/market/funding_candles/2026/10/19/fBTC.csv",
-      "sha256": "7a86e372fc2efa651e378854ea9c46e3f9a48f639c20db227aa17d5d9d0714e3",
-      "size": 287
+      "sha256": "cabdaaef95f7394ae12645d8d5d60afb62e62a2ee55ec9d4376d995792ce3642",
+      "size": 2672
     },
     {
       "relative_path": "data/local_public/market/funding_candles/2026/10/19/fETH.csv",
-      "sha256": "cfe80fa23bf5cdce162d588e02ef64f3d683eed881b675bf323f786c5e2075be",
-      "size": 294
+      "sha256": "07f26dd50684c7eb34c6e1d56e21ddb61df12f1fffea0861e7ded9579cdacc87",
+      "size": 2873
     },
     {
       "relative_path": "data/local_public/market/funding_candles/2026/10/19/fUSD.csv",
-      "sha256": "a3476d0eb6852c30315757541b84a8ce93db9368a009f8e731c875558136b8d0",
-      "size": 314
+      "sha256": "41ce13c1ca9567aec54d33163278a3e90725788a766d4e5b134688790afeefad",
+      "size": 3196
     },
     {
       "relative_path": "data/local_public/market/funding_candles/2026/10/19/fUST.csv",
-      "sha256": "9bec7620612eec12af27499c977cc4fec15ad7d21ceee4a7707387d80ae2308e",
-      "size": 322
+      "sha256": "5731417e618374146e9b9fa0312deb104b915cc675b7e40cc4d22b4cdf10e003",
+      "size": 3141
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/20/fBTC.csv",
+      "sha256": "264ff69a20978a5aae8679e84e71861967779f7a6c5dddf53d9cf674cc153a8f",
+      "size": 2677
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/20/fETH.csv",
+      "sha256": "a64d8504243e9920f5309c44f261a802304a3db93736b479790b50f4de5da669",
+      "size": 2838
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/20/fUSD.csv",
+      "sha256": "97b312776d9e0b94364961dd9a1e5324a5e28cc1256e1109ee42bfcce2bb8ade",
+      "size": 3197
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/20/fUST.csv",
+      "sha256": "5335ab79e75b24a67481362539e67a778441f9c0a0c4516f10433b8e570aa087",
+      "size": 3110
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/21/fBTC.csv",
+      "sha256": "1701af15b5d5037a895d79d37437e155875d9d2c214f6a235e89d96d44ab9deb",
+      "size": 2702
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/21/fETH.csv",
+      "sha256": "ba89d9b90c9b630bf41a81e9ad20b34c737f2643459289bb21447f46889468f5",
+      "size": 2871
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/21/fUSD.csv",
+      "sha256": "2614bf2b0368b85d516244354346ba1de84ba9b51b53c5c3f85e481f57833457",
+      "size": 3195
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/21/fUST.csv",
+      "sha256": "da33d8fdad1caf6ee1e7c169cec9f94ad8bd291fe6b80c6bf76c2d91826bff4c",
+      "size": 3142
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/22/fBTC.csv",
+      "sha256": "8139858059f69a7d2af047e061a018ba74d288b0d7f980d6f4a3df144e2f8cd0",
+      "size": 2672
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/22/fETH.csv",
+      "sha256": "cadecd1b39814d7393a99f8bf9f6488d285846a1a0c8cd020feb879eaec8e7c5",
+      "size": 2805
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/22/fUSD.csv",
+      "sha256": "2e8e240205ac5b08a711e3842648233b3204d54495440f65cbec73804aeb1ffd",
+      "size": 3174
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/22/fUST.csv",
+      "sha256": "371a8fc0347d66e62ca7cf3d6318168e6aca7d6b1a8a380823190eee63652914",
+      "size": 3147
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/23/fBTC.csv",
+      "sha256": "659222fb5413e7b8657ee8d0c6d2af2f413c68705e856fdaa1620b01bac3f7f1",
+      "size": 2658
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/23/fETH.csv",
+      "sha256": "ddb11cbd0448606a465c2110f82aadcb8813d00754668a25fb6e7b8778e37a0e",
+      "size": 2795
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/23/fUSD.csv",
+      "sha256": "cda9eef5d248bafe61b4a0d08cdb3d169d13550ceb2677a8117c16901ad49e9b",
+      "size": 3139
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/23/fUST.csv",
+      "sha256": "27267fea538901468816b0e5cb7d56f7ecc4dfcaeebba2a1aa7ac83153c5edc8",
+      "size": 3161
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/24/fBTC.csv",
+      "sha256": "134d6a2965dfb7fcbec0c07fad1e4fe5275ac5f9a8438a078068b04ec8b507a4",
+      "size": 2691
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/24/fETH.csv",
+      "sha256": "c8240f89b71b056bba40ec0f55902fb783b6df2af088c34ad439d0893b186492",
+      "size": 2871
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/24/fUSD.csv",
+      "sha256": "704abba61194dcdd997738f922d841be7d89f36b9f4dd051e66c9df3c5be9fa8",
+      "size": 3146
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/24/fUST.csv",
+      "sha256": "4a92ade0cf02b64d29b7961d73edb2ad453e2b86db9972ac9cfdb28ae95e2723",
+      "size": 3160
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/25/fBTC.csv",
+      "sha256": "e15bce7cbedd2fb5432f56e7af093920b14e646db4d89eba95548f3a7909baa3",
+      "size": 2692
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/25/fETH.csv",
+      "sha256": "5c02f4141d531aa52df654a5a6f9923f1770ec6d77f6a9cd0f189afbbd039941",
+      "size": 2823
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/25/fUSD.csv",
+      "sha256": "27c7aa4c6f03a130ced7bbabb762bcfa9e2bd922f398c563fe085792af3ac537",
+      "size": 3163
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/25/fUST.csv",
+      "sha256": "5a2cc2f2dd8b9724acf3c54df59cbdbbbe02521d5a9d13cd3c952e3c920fbf95",
+      "size": 3155
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/26/fBTC.csv",
+      "sha256": "95841e51c70651b16e47936359e524919927d8042e8832f3723a4e048fe44936",
+      "size": 396
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/26/fETH.csv",
+      "sha256": "174c6a360f5d7f4e35911bd10762ab4c399f4c3a9ae3a52689402b88289271c2",
+      "size": 400
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/26/fUSD.csv",
+      "sha256": "70b947079b31d930dc8834d53e5c7e56202d7a29d482146eaf6fefe43908037d",
+      "size": 455
+    },
+    {
+      "relative_path": "data/local_public/market/funding_candles/2026/10/26/fUST.csv",
+      "sha256": "89461513fbba38aa489faed0dc4765f70e95020f6cbc7657bb620cbea648ab2f",
+      "size": 448
     },
     {
       "relative_path": "data/local_public/market/funding_stats/2026/08/16/fBTC.csv",
@@ -2562,23 +2702,163 @@
     },
     {
       "relative_path": "data/local_public/market/funding_stats/2026/10/19/fBTC.csv",
-      "sha256": "455f5112f510dbe25d404853e2acb38bee06158fe157ddf68aa2b800057c4094",
-      "size": 674
+      "sha256": "744bab67b7ea9a13a3873d232ec2c24525a2824a9e6971a47a4737d8bb64bef7",
+      "size": 6910
     },
     {
       "relative_path": "data/local_public/market/funding_stats/2026/10/19/fETH.csv",
-      "sha256": "a55c6adbdcb2ae01d52b862ed7f14f12c227fc94cb7d7f0b68fd6136aff93cf3",
-      "size": 718
+      "sha256": "b52c280a762daa180768270e5a49c75d21e944b2ba4505a7197ca889b126d4eb",
+      "size": 7388
     },
     {
       "relative_path": "data/local_public/market/funding_stats/2026/10/19/fUSD.csv",
-      "sha256": "eae4f80789e9684d7acf4f3304e948de7392aad6f10339ea25fb6a2a249b174b",
-      "size": 754
+      "sha256": "b2d930eb92bec53c6ca6608ee48aeb4ddbe3c257c72af2a397030ec9bea015af",
+      "size": 7808
     },
     {
       "relative_path": "data/local_public/market/funding_stats/2026/10/19/fUST.csv",
-      "sha256": "a681e415366843ea02e907617e8c5096957640b8141c8e802cf11b3a5835fa43",
-      "size": 758
+      "sha256": "62051c807498e00c128d13ed1ca1093f4823498bf717e71b9195b019d3fae046",
+      "size": 7832
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/20/fBTC.csv",
+      "sha256": "bde3c5d1915357e52399aff0d64438b86957648abf0bd79033382bb199d87af1",
+      "size": 6832
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/20/fETH.csv",
+      "sha256": "1dd70d7233df8156a4047395f940477069bc2a8243374cea6f630c5b70c16f77",
+      "size": 7374
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/20/fUSD.csv",
+      "sha256": "2f73152ee94d5d4ffd409ed737cbac2ad2e7293d0ddab1c82ebfe5ffe477c25b",
+      "size": 7816
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/20/fUST.csv",
+      "sha256": "087d89a48110dcb654a36ce3fa87d364cb6677a2a1f5e62704290b76b97c377d",
+      "size": 7820
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/21/fBTC.csv",
+      "sha256": "18eed91de3d89ae2ac130a4fc9d36fd6db7572c941f3507fc5717b4809edeb11",
+      "size": 6816
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/21/fETH.csv",
+      "sha256": "4275b5d95d472598692be93642cee6efa0c7ee19048b97f563be0ea4bc817004",
+      "size": 7384
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/21/fUSD.csv",
+      "sha256": "76fb21c36168bd4c642605576a2d53722274975d036fb99ebb2f2963da234647",
+      "size": 7784
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/21/fUST.csv",
+      "sha256": "8481a27807d087a349ff32876944efc2c28e971bb1457069e3d55866fa24245d",
+      "size": 7806
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/22/fBTC.csv",
+      "sha256": "9447cecf925945ee96b16099eff8682e39c83dacde6a489fb712304e96ff07ec",
+      "size": 6804
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/22/fETH.csv",
+      "sha256": "dfc0b1fe9090e3e951ad79d6f4e3fef6f3eb2a5ab8dfb73bc48d7861217b0d16",
+      "size": 7326
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/22/fUSD.csv",
+      "sha256": "a1f54ecb87882f93a55aed27480173098e709ff9adf356f3368939e427dc235e",
+      "size": 7786
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/22/fUST.csv",
+      "sha256": "45905da5808d03b0c80f6f9ececab6b16f30aea9488dc7cf422460129c40cf36",
+      "size": 7826
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/23/fBTC.csv",
+      "sha256": "61c3e1d6f79976a6d9fbf772e2435175c5c5e5b9fc56ef4946dc7a4b1b7cc500",
+      "size": 6818
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/23/fETH.csv",
+      "sha256": "8272ef6e2b652737a891a5cb7e6cdbf191d83ddd56687f495e92bf591bb60e02",
+      "size": 7298
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/23/fUSD.csv",
+      "sha256": "46e5966a5128949403e0c3f2231b5b40183360125a185934f25894c5b82b9cf0",
+      "size": 7800
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/23/fUST.csv",
+      "sha256": "c6cfb2ad4f9633c672d43430279442122c59ff5291a5e1e573f8cad1d4fd7994",
+      "size": 7804
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/24/fBTC.csv",
+      "sha256": "ebcac09702c8effdfacf116ff3bd2dbbee73f24191f03d5df45313b29cfb0f43",
+      "size": 6810
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/24/fETH.csv",
+      "sha256": "46490a591bdca6dc7d3e06e8d16b448cea669a5b2dc3c3c4c5f89e70ca8f452a",
+      "size": 7328
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/24/fUSD.csv",
+      "sha256": "39a4261afefa963e81803cc93ed381529ed0570394ecf79060515fda1154923f",
+      "size": 7814
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/24/fUST.csv",
+      "sha256": "8f8f1af290be58f0a2c6e4241d6fbb9f9c73b5f10a4f138e20c5ecc728f7d954",
+      "size": 7834
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/25/fBTC.csv",
+      "sha256": "9032b08c4d7eb7c5a43b4143d1af6a269fe51e6f04abfd697c7825a01e93364f",
+      "size": 6820
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/25/fETH.csv",
+      "sha256": "1e98243986dd7559fe0891af3a604f344f774ffaf902da0b9de289525e9cb733",
+      "size": 7378
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/25/fUSD.csv",
+      "sha256": "0b59fd433be233a211e48e05739e3d89e4310045f7b36c6c83e37c19731e8dc2",
+      "size": 7794
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/25/fUST.csv",
+      "sha256": "17bea259cbc0c5b67466e6d559aa56ae1ed5c0f3e2de589424111866d1a9ff93",
+      "size": 7810
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/26/fBTC.csv",
+      "sha256": "62413483ff1ee203c005309094cd9bca643b4464275d05ea85a7b091fd772c41",
+      "size": 950
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/26/fETH.csv",
+      "sha256": "e49b41767102c3f63200371b44153835221198fae45caf64547f384cb2c3c6cc",
+      "size": 1018
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/26/fUSD.csv",
+      "sha256": "aad8f5b8281da604fd9c3cc914a4a69d8231095c93667411736c1aacf58462f9",
+      "size": 1074
+    },
+    {
+      "relative_path": "data/local_public/market/funding_stats/2026/10/26/fUST.csv",
+      "sha256": "ecac48bb5de3b5632835a32934c13427639ba646ddc2f1dca9d9306bd81942c3",
+      "size": 1072
     },
     {
       "relative_path": "data/local_public/market/prices/2026/08/16/tBTCUSD.csv",
@@ -3222,13 +3502,83 @@
     },
     {
       "relative_path": "data/local_public/market/prices/2026/10/19/tBTCUSD.csv",
-      "sha256": "91265154cbb30cce7a67dde858d37e8ae1580be7088b39de810df08bb5011409",
-      "size": 327
+      "sha256": "18950982bdfe6507b0ba797a2604eeb0371a85642e10bd40be979a803ab4f3b5",
+      "size": 2835
     },
     {
       "relative_path": "data/local_public/market/prices/2026/10/19/tETHUSD.csv",
-      "sha256": "22ad50f37d45584d5a0947991cc1ff6fc953fcaf38f24055a09bd525f0df8de2",
-      "size": 342
+      "sha256": "fdbd6c08f8adc314ea2c7b85164b92a11b5d8aa4956ebc7fbb63986924a445f2",
+      "size": 2986
+    },
+    {
+      "relative_path": "data/local_public/market/prices/2026/10/20/tBTCUSD.csv",
+      "sha256": "68b29fdb2d395560a71a78821c8d171d8d75cc51e204c87b80b95f0fe6ce6f30",
+      "size": 2862
+    },
+    {
+      "relative_path": "data/local_public/market/prices/2026/10/20/tETHUSD.csv",
+      "sha256": "e6eea2bcc6defb7f745d9a5bf4ecca8f19e7b581ad87f825561f4d33bceb571c",
+      "size": 2955
+    },
+    {
+      "relative_path": "data/local_public/market/prices/2026/10/21/tBTCUSD.csv",
+      "sha256": "3396c1fd590662d4317f5d40200e9a84fd7872d3f73d05a29007c77023b7e361",
+      "size": 2850
+    },
+    {
+      "relative_path": "data/local_public/market/prices/2026/10/21/tETHUSD.csv",
+      "sha256": "6ae9b24f75efc90d91b92f71406f86e3488ad36ef3eec61b795500e1b737f931",
+      "size": 2964
+    },
+    {
+      "relative_path": "data/local_public/market/prices/2026/10/22/tBTCUSD.csv",
+      "sha256": "752a24305e6f175355c93fad2baa54050a7c315c175946aac6283c952e3242d6",
+      "size": 2885
+    },
+    {
+      "relative_path": "data/local_public/market/prices/2026/10/22/tETHUSD.csv",
+      "sha256": "38fe1eb19d0e4f10ace5279c7b7b0715ea1d23fbfe1f2fe55b2b495c3d602170",
+      "size": 3029
+    },
+    {
+      "relative_path": "data/local_public/market/prices/2026/10/23/tBTCUSD.csv",
+      "sha256": "58217772eff2f781e060be5ba9341451ce14f417a8b5995deda0242cfde17a58",
+      "size": 2865
+    },
+    {
+      "relative_path": "data/local_public/market/prices/2026/10/23/tETHUSD.csv",
+      "sha256": "8c07c9dddbe5d3df95e4b4cedc2e51ce850668ae14bc040e1592eb90656dfebb",
+      "size": 3001
+    },
+    {
+      "relative_path": "data/local_public/market/prices/2026/10/24/tBTCUSD.csv",
+      "sha256": "27a41a92adb7f15ea9493fa7f43961772a17dce9d91fc1b5633e9087e947a8f2",
+      "size": 2892
+    },
+    {
+      "relative_path": "data/local_public/market/prices/2026/10/24/tETHUSD.csv",
+      "sha256": "89e3c66f2bf992e7badc9604476cc23846d6ab4c3953eed045967396b832dbf5",
+      "size": 3015
+    },
+    {
+      "relative_path": "data/local_public/market/prices/2026/10/25/tBTCUSD.csv",
+      "sha256": "c597189d43a3105bdd692f1c5939a73769359e9a01be57e44471a28cc507a6c5",
+      "size": 2858
+    },
+    {
+      "relative_path": "data/local_public/market/prices/2026/10/25/tETHUSD.csv",
+      "sha256": "19039d270a5c1fa781cb083686d0a4004959fe9dba892ef499d51c97a00f86f6",
+      "size": 3031
+    },
+    {
+      "relative_path": "data/local_public/market/prices/2026/10/26/tBTCUSD.csv",
+      "sha256": "718fd9562e8de939d1788d65f6d33e18da8478d824bdc56118a968ee4db3330e",
+      "size": 449
+    },
+    {
+      "relative_path": "data/local_public/market/prices/2026/10/26/tETHUSD.csv",
+      "sha256": "4a8a0fe2c449acbee66b1705fafcfc182123ffaa11df387f88b32cffae4021d4",
+      "size": 464
     },
     {
       "relative_path": "data/local_public/market/ticker/2026/08/16/fBTC.csv",
@@ -4502,23 +4852,163 @@
     },
     {
       "relative_path": "data/local_public/market/ticker/2026/10/19/fBTC.csv",
-      "sha256": "7e3ddeba30b2520c09a0276d51b2f7b909a2eb83620d9a84c4525fa27d6ed813",
-      "size": 484
+      "sha256": "2032cd5898d2c3e98c6eee287a65632f1d9bffd3fd52293c9d4bfcbd1bc8e662",
+      "size": 4052
     },
     {
       "relative_path": "data/local_public/market/ticker/2026/10/19/fETH.csv",
-      "sha256": "f4c2b85c1d4e29c24da330de4a71f790fc080b9513def1567e0bbec919137102",
-      "size": 552
+      "sha256": "10b077bf88d49218eac295d1b68f7821ba39eecc0e1ff423a6936265f74aba30",
+      "size": 4821
     },
     {
       "relative_path": "data/local_public/market/ticker/2026/10/19/fUSD.csv",
-      "sha256": "1d4100b94a38aaec64573cb6d5a5da7696757513ed31faf49c7c9b713859efc2",
-      "size": 631
+      "sha256": "a391bba328b87f3466b2976520bfa1798a6deff5b90a5c1dd227daa92169bee9",
+      "size": 5737
     },
     {
       "relative_path": "data/local_public/market/ticker/2026/10/19/fUST.csv",
-      "sha256": "7fa34ad59b5f4009f7175d98d20ac8a4354df92d81f246e6ea72cde5e6f49ee5",
-      "size": 612
+      "sha256": "3f2cf7c17f5a16c6db01d55b00143bf03577fa93df05cd0f257900ee4b2a3236",
+      "size": 5605
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/20/fBTC.csv",
+      "sha256": "efe947701733371b88ab088f4543ddc2967f90d12d13d6a8b8592c892cc4b035",
+      "size": 4010
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/20/fETH.csv",
+      "sha256": "154e4d8282d8ff3c9a81b483f909d90a74783d1f247de8a7708de43b20baee7e",
+      "size": 4752
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/20/fUSD.csv",
+      "sha256": "5a42ce0f6d029f7b3ef997d2fe39428ebd9f4c0f12fbd0ee11d92536c41e5ec2",
+      "size": 5608
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/20/fUST.csv",
+      "sha256": "3a73d7f0f736a9ee9a31a801c5d0c34caa7762ac55524fa1ab474d23b9082e88",
+      "size": 5592
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/21/fBTC.csv",
+      "sha256": "b74905a79c8e54da780e0f81b5e6de4ed3925347d89aeb1c6140b37825ab00ad",
+      "size": 4122
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/21/fETH.csv",
+      "sha256": "e382376bf7b530ed6ce0797bedeec5dc5d69eaf9c6d18270dcddaaf0836c46eb",
+      "size": 4663
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/21/fUSD.csv",
+      "sha256": "826e14c923baeeeccf1328b3d7e8b057da42111b8c2781c5f58dc90bc5e1728b",
+      "size": 5585
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/21/fUST.csv",
+      "sha256": "df0e18587a8fbefa20b95a80a91f69b1ed15c2f012b6331b6c4c22eecd90e9c6",
+      "size": 5728
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/22/fBTC.csv",
+      "sha256": "583c583eb857098800b333267b5cbb0e47cce627aa7f139890a7b2712a90afb7",
+      "size": 4087
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/22/fETH.csv",
+      "sha256": "0689a21371f8f86fd3f1c9c6da9483bcc564ed214af574da83593732fd4afed1",
+      "size": 4583
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/22/fUSD.csv",
+      "sha256": "e543e3f08e35f8dfa063c990a97d4f658c5acc87f83b73895958e83cdea4d10c",
+      "size": 5490
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/22/fUST.csv",
+      "sha256": "15b524a33201fe46cf37868c42772654d49c2ff3b2ff2e57522aad0901504635",
+      "size": 5731
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/23/fBTC.csv",
+      "sha256": "4546640cc50333b785d5c41dfa70c230482b95ae3238f0d844d4aeeca34dfb28",
+      "size": 4124
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/23/fETH.csv",
+      "sha256": "e98afd06d0ff78f5fd53bd8addd7ac7b860d70adb803eb13dd091f0778f5a980",
+      "size": 4531
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/23/fUSD.csv",
+      "sha256": "6493879e271322bf9fabf0eaa94ccfc5c541d93f7f83bd730f621d3cfe27e41f",
+      "size": 5461
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/23/fUST.csv",
+      "sha256": "9b618c037014e2cb185932f52f59e2d32339c58e28f473dade9b82f8dcce8b8c",
+      "size": 5597
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/24/fBTC.csv",
+      "sha256": "551ae388d39cf4e88e55b2a5cb25d2190b83a3f2f15ac331713600544ff6bee0",
+      "size": 4106
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/24/fETH.csv",
+      "sha256": "478091bd33c8e6703f3fde059530b2bf654bb01cf092966b14be7977aa401c99",
+      "size": 4609
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/24/fUSD.csv",
+      "sha256": "28d8f451a35c2e9cf042a1822ef44b025e51af9617372895664af39dcaa06172",
+      "size": 5393
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/24/fUST.csv",
+      "sha256": "8ea55ef11237b7e9bd2f83c94670c5157619c8cd12d8f0c280ca2fc3ca7a9cdf",
+      "size": 5435
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/25/fBTC.csv",
+      "sha256": "2d2c8a1995fc891ec47722f267c186f9ad72b88a0207ee95f7040b42dabffb09",
+      "size": 4142
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/25/fETH.csv",
+      "sha256": "5310ac3cfb78cc5d3b0c6c4d710eb1f06d3631e89ea9dcca901c96a5a1f12c6a",
+      "size": 4727
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/25/fUSD.csv",
+      "sha256": "5c01cf43318992e36c051528c8737ab3b0c20e22b6976bd22cfbfcff481bb521",
+      "size": 5473
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/25/fUST.csv",
+      "sha256": "489193b0ad394d274c787c77011eea6f531c8b37531a08c042828787f2a1d8c3",
+      "size": 5399
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/26/fBTC.csv",
+      "sha256": "7d77a54ecb8dd70e26977c2694d1a98f2a8d3bb33643c4a008268d80266b75ea",
+      "size": 673
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/26/fETH.csv",
+      "sha256": "d51473d95d203f0bb67468250a0683693081b80df439a9864883dd9e046559fc",
+      "size": 744
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/26/fUSD.csv",
+      "sha256": "adc383b878da76e4d51591d37f043bd6f5367ad4f4e8c18439ba8dfb909231c2",
+      "size": 817
+    },
+    {
+      "relative_path": "data/local_public/market/ticker/2026/10/26/fUST.csv",
+      "sha256": "220ac8570f6bc0810c29fee8dd155926f886ee251f4ef5b7680b0fd93eaec13b",
+      "size": 821
     },
     {
       "relative_path": "data/local_public/metadata/separation_manifest.json",
@@ -5767,23 +6257,163 @@
     },
     {
       "relative_path": "data/local_public/raw/2026/10/19/fBTC.csv",
-      "sha256": "d262a93b27cc4740bf654f03dcdd40ab8768e75e65155be4b7414c8f14b34c98",
-      "size": 6485
+      "sha256": "236ab3a584e0223fdb918164570608e318524ac3efe0143919459d4511205bcf",
+      "size": 75822
     },
     {
       "relative_path": "data/local_public/raw/2026/10/19/fETH.csv",
-      "sha256": "633870e39ef24ef4b2ff53b287c598b077cf9afabce111aeda7ebbe44dd417c6",
-      "size": 5903
+      "sha256": "e038a71d7cf3c8e150daaea4f3567c3672636c6709136a9ceedaaba1bebbb9c7",
+      "size": 70944
     },
     {
       "relative_path": "data/local_public/raw/2026/10/19/fUSD.csv",
-      "sha256": "dcd0aac1ba569359202057f01d095de83e28a37cd1e575bfa5b6081e835f1fab",
-      "size": 11157
+      "sha256": "32562082230657f5abbd611dda1cd35a62995710893f04d0a70a86efc45e283c",
+      "size": 133903
     },
     {
       "relative_path": "data/local_public/raw/2026/10/19/fUST.csv",
-      "sha256": "de732654e7c5d782193abd85f40c27a9c9ed90f5af8bcda93ad5ba928f78bcdf",
-      "size": 11282
+      "sha256": "deadce9c359ad8c4cfbd3007c9486b174736cf66bbce4a2f6ef720d625d2e0a6",
+      "size": 135199
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/20/fBTC.csv",
+      "sha256": "eeb04f5656b06153c61f2937a9d459e9be1ef0ce06f73447224edcb3491bfe80",
+      "size": 74467
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/20/fETH.csv",
+      "sha256": "bcbab4c57f35d4fe3008916d90ca8fc2204232f6f8c49af7aec7706a8bd17492",
+      "size": 71088
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/20/fUSD.csv",
+      "sha256": "6a09c4a733fa5d162c57364730f05735be487bf809ac73e119483a29d938ed00",
+      "size": 132109
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/20/fUST.csv",
+      "sha256": "265e540909401f485d0d15748283106ee9071c4e1704f13025ca61316cd3c57c",
+      "size": 135155
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/21/fBTC.csv",
+      "sha256": "b91e447ca1b8030755e0ee9178af89a45540047ca1c16ebea5142c7a469a54e8",
+      "size": 74444
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/21/fETH.csv",
+      "sha256": "dc8f7eae6a84a4915261c68645f789fcbe2be733578a8c31227fb931bb08aff7",
+      "size": 69374
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/21/fUSD.csv",
+      "sha256": "4678e5cc7171f45ea447aa2d9f7528d64e275a1f05f5a66d7d98e043802703f9",
+      "size": 132521
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/21/fUST.csv",
+      "sha256": "aef8d3a0ca3e62150a89b05a72c7eeef222f1d742e7e12798dc4273d4f13e3da",
+      "size": 135214
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/22/fBTC.csv",
+      "sha256": "bd7f370992ac437907a19194b7bc5155e19e56153cc95eb17b8de60e6c91eb25",
+      "size": 73947
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/22/fETH.csv",
+      "sha256": "8460b70881b006e7b913b47e586fb4dd7f580eace2682135d45751563d72fe46",
+      "size": 69829
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/22/fUSD.csv",
+      "sha256": "4199fcef41aa2edf9201c1c2fd766adf1a2b376cd076498c0437f50f4d9d36e0",
+      "size": 133559
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/22/fUST.csv",
+      "sha256": "ffb0e4a0dcfba0034101f2c723839ed2ce943aab88316c1eafa4f33e7187631d",
+      "size": 135292
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/23/fBTC.csv",
+      "sha256": "17e331bfa9a84f56fd3d092272dfe661060ee51a0d624dfdda97847660f17569",
+      "size": 74153
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/23/fETH.csv",
+      "sha256": "e00da6886f08c03c016e4a259da223c2c41cc2af464ae9eab591eb693b9963b3",
+      "size": 68642
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/23/fUSD.csv",
+      "sha256": "8e8be4fc62a6ae330622cb249de2bb097d306b133ad2cb3a81a0ede0b1bf01a5",
+      "size": 133475
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/23/fUST.csv",
+      "sha256": "b51dc0c162cb613535e789ad1c6bbf7c025eacc799faa6c83818bd8b86aca90c",
+      "size": 134981
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/24/fBTC.csv",
+      "sha256": "894786b201d1a2c03f5d5b834ba6b572febd96a368bc8ddbf7ff982419ac513b",
+      "size": 74510
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/24/fETH.csv",
+      "sha256": "04ce6981ff5e778d1b6f206e5674194b4b1b57a63372a0350ccc16d7394d7738",
+      "size": 71303
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/24/fUSD.csv",
+      "sha256": "bbe76611ebc820f6155ca415d1adebf20222aa2b3cf73398bc79652ff56cfd5e",
+      "size": 132971
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/24/fUST.csv",
+      "sha256": "dca6dc7d915cbac0649fd9bdd4e6bf9cd81d74ab37aa85315fc5aa50ee158081",
+      "size": 133104
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/25/fBTC.csv",
+      "sha256": "7e250e0cfef630c8fcc1dc3d789005fbd0fc5145978a1fdd4e6a8b53f5aaa735",
+      "size": 74337
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/25/fETH.csv",
+      "sha256": "1aea1c8bd477f57172fc9d081628d0859e64d19b84db254c23a8f0e395d5b08f",
+      "size": 70582
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/25/fUSD.csv",
+      "sha256": "c17f6850fb53097679d23e256ca48954f79c7b7c9345970a5e9c64694f1412d1",
+      "size": 132660
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/25/fUST.csv",
+      "sha256": "f683013488636b79cea0fce11a3ca7af98e8794e8f3323ba548d759c399fc4ae",
+      "size": 133337
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/26/fBTC.csv",
+      "sha256": "bd89e8632c7e4bffdc8fdcdedab16dd9d67e8a48cb5e285fe19054feebededd3",
+      "size": 9639
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/26/fETH.csv",
+      "sha256": "15e510b112e228a5547df27d20ff74f74e3030d938d9423af92df8a099d928d4",
+      "size": 8761
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/26/fUSD.csv",
+      "sha256": "4e577e52bb66e87201e69f24b142f043c73ece0e9f0515027067f2ed94986bf0",
+      "size": 16538
+    },
+    {
+      "relative_path": "data/local_public/raw/2026/10/26/fUST.csv",
+      "sha256": "9c365e3476e1399bea6c372acca03faec8c6fa7c096546ccc71406c58b157d12",
+      "size": 16620
     }
   ],
   "schema_version": "local-public-git-sync-v1"

@@ -16,7 +16,7 @@ python -m bitfinex_lending.public_git_sync --project-root . --branch master
 python -m bitfinex_lending.public_git_sync --project-root . --branch master --push
 ```
 
-結果為 `success`、`no_changes` 或 `failed`。本機狀態寫入 `data/metadata/public_git_sync_status.json`，此檔不進 Git。同步失敗不會刪除公開資料，也不會停止公開或私人收集器。
+結果為 `success`、`no_changes` 或 `failed`。本機狀態寫入 `data/metadata/public_git_sync_status.json`，此檔不進 Git。同步失敗時，狀態檔會記錄失敗階段、Git 回傳碼（若有）與實際推送嘗試次數；不保存完整命令、遠端網址或錯誤輸出，避免憑證資訊外洩。同步失敗不會刪除公開資料，也不會停止公開或私人收集器。
 
 ## 每週排程
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import subprocess
 
@@ -92,6 +93,68 @@ def test_push_retry_is_bounded() -> None:
             raise subprocess.CalledProcessError(1, ["git", "push"])
 
     assert push_with_retries(fail_twice, max_attempts=3) == 3
+
+
+def test_failure_status_records_clone_stage_without_sensitive_error_details(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    project = tmp_path / "project"
+    _write(project / "data/local_public/raw/2026/08/16/fUST.csv")
+
+    def fail_clone(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
+        raise subprocess.CalledProcessError(
+            128,
+            ["git", "clone", "https://token@example.invalid/private.git"],
+            stderr="authorization: secret-token",
+        )
+
+    monkeypatch.setattr(public_git_sync, "_run", fail_clone)
+
+    with pytest.raises(subprocess.CalledProcessError):
+        synchronize(
+            project,
+            branch="master",
+            push=True,
+            remote_url="https://token@example.invalid/private.git",
+        )
+
+    status_text = (project / "data/metadata/public_git_sync_status.json").read_text(
+        encoding="utf-8"
+    )
+    status = json.loads(status_text)
+    assert status["failed_stage"] == "clone"
+    assert status["return_code"] == 128
+    assert status["attempts"] == 0
+    assert "secret-token" not in status_text
+    assert "example.invalid" not in status_text
+
+
+def test_failure_status_records_actual_push_attempts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    remote = _bare_remote(tmp_path)
+    project = tmp_path / "project"
+    _write(project / "data/local_public/raw/2026/08/16/fUST.csv")
+    real_run = public_git_sync._run
+
+    def fail_push(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
+        if args and args[0] == "push":
+            raise subprocess.CalledProcessError(1, ["git", *args], stderr="rejected")
+        return real_run(cwd, *args)
+
+    monkeypatch.setattr(public_git_sync, "_run", fail_push)
+
+    with pytest.raises(subprocess.CalledProcessError):
+        synchronize(project, branch="master", push=True, remote_url=str(remote))
+
+    status = json.loads(
+        (project / "data/metadata/public_git_sync_status.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert status["failed_stage"] == "push"
+    assert status["return_code"] == 1
+    assert status["attempts"] == 3
 
 
 def test_synchronizes_to_local_remote_and_second_run_is_noop(tmp_path: Path) -> None:

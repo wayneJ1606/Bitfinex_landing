@@ -12,6 +12,7 @@
 - 已在安全分支建立三個本機 checkpoint：`df4a081` 保存一鍵完整更新流程與測試、`6ff5a57` 保存正式模型／回測／最佳化策略與 Dashboard 輸出、`aa1cc7f` 保存報告與簡報產生工具。公開原始資料仍由白名單同步管線管理；私人資料、執行狀態、DOCX／PDF／PPTX 與逐頁預覽不納入這批 Git 提交。
 - 每日 10:00 本機排程原本只執行最佳化策略管線，未先重建本機模型。已採最小修改設計，保留原工作名稱與排程條件，改由隱藏的 PowerShell 執行 `scripts/run-final-refresh.ps1`，使更新順序固定為模型 → 策略 → Dashboard；排程合約與一鍵更新專項測試為 `4 passed`。
 - 已更新並啟用既有 `BitfinexP0StrategyAnalysis` 工作，完整測試為 `374 passed, 1 deselected in 45.50s`。2026-10-26 11:14 手動觸發後 `LastTaskResult=0`，模型評估、正式策略狀態與 Dashboard 均取得較新的修改時間；策略狀態維持 `formal`、結果 1,400 筆，下次排程為 2026-10-27 10:00（台灣時間）。
+- 公開資料 GitHub 同步的失敗狀態已補上 `failed_stage`、Git `return_code`（若有）與實際推送 `attempts`；狀態檔不保存完整命令、遠端網址或 stderr。複製階段失敗與推送重試失敗的專項測試均已涵蓋。
 
 ## 2026-10-12 P0 Task 10 production path 與交接驗證完成
 

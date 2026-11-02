@@ -1,0 +1,3 @@
+collected_at,market,candle_key,mts,open,close,high,low,volume
+2026-11-02T00:47:04.112956+00:00,fBTC,trade:1h:a30:p2:p30,1793577600000,2e-08,2e-08,2e-08,2e-08,2.52753396
+2026-11-02T01:47:04.402925+00:00,fBTC,trade:1h:a30:p2:p30,1793581200000,2e-08,2e-08,2e-08,2e-08,0.56807472

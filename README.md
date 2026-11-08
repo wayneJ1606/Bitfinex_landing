@@ -131,13 +131,23 @@ python -m pip install -e ".[test,modeling]"
 python -m bitfinex_lending.modeling
 ```
 
-命令以 repository 的 `data/raw` 為唯一輸入，完整重建以下檔案：
+命令會優先讀取本機公開資料 `data/local_public/raw`，並以 repository 的 `data/raw` 補齊缺少的小時；完整重建以下主要檔案：
 
 - `data/modeling/modeling_features.csv`
 - `data/modeling/model_status.csv`
 - `data/modeling/model_evaluations.csv`
 - `data/modeling/predictions.csv`
+- `data/modeling/backtest_results.csv`
+- `data/modeling/decision_support.csv` 與 `data/modeling/decision_support.md`
 
-每個市場必須有至少 168 筆 predictor 與下一期目標均完整的有效特徵，才會依時間順序進行 80%／20% 切分，評估 `baseline_mean`、`baseline_previous` 與 `linear_regression`，並輸出 MAE、RMSE 與 R²。資料不足不是執行錯誤：狀態會記為 `insufficient_data`，評估與預測 CSV 只保留標頭；歷史資料補齊後執行相同命令即可開始模型評估。
+每個市場必須有至少 168 筆 predictor 與下一期目標均完整的有效特徵，才會依時間順序進行 80%／20% 切分，評估 `baseline_mean`、`baseline_previous`、`linear_regression`、`decision_tree` 與 `xgboost`，並輸出 MAE、RMSE 與 R²。資料不足不是執行錯誤：狀態會記為 `insufficient_data`，評估與預測 CSV 只保留標頭；歷史資料補齊後執行相同命令即可開始模型評估。
+
+若要依正式順序一次更新模型、回測、最佳化策略與唯讀 Dashboard，請在 repository 根目錄執行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run-final-refresh.ps1 -ProjectRoot . -PythonPath .\.venv\Scripts\python.exe
+```
+
+完成後可直接用瀏覽器開啟 `data/modeling/p0_strategy/latest/dashboard.html` 查看結果；這是離線唯讀頁面，不會登入帳戶或執行下單。模型比較與回測明細分別位於 `data/modeling/model_evaluations.csv`、`data/modeling/backtest_results.csv`，摘要位於 `data/modeling/model_report.md`、`data/modeling/backtest_report.md` 與 `data/modeling/decision_support.md`。
 
 `.github/workflows/build-modeling-dataset.yml` 每日 `18:37 UTC` 自動執行，也支援從 GitHub Actions 手動觸發。它會先跑完整離線測試，再重建並只提交 `data/modeling`。此流程僅供研究與決策輔助，不會登入帳戶、自動下單或保證收益。

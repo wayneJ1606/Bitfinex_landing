@@ -2,9 +2,13 @@
 
 ## 2026-11-09 結案前依序整理
 
+- 已建立最新遠端整合候選 `codex/remote-master-reconciliation-20261109`：merge commit `2ddc21f6f593ef74c33d5a4f3c29f2698b45f024` 同時包含遠端 `dbc914e` 與本機 `b6cd3e4`，遠端重新抓取後未再前進；隱私測試 2 項通過，完整測試為 `380 passed, 1 deselected`。候選目前只存在本機，未推送也未改動遠端 `master`。
+- 已以 2026-11-08 正式資料更新結案內容：四市場皆由 `baseline_previous` 最佳，fUST 最佳 R² 為 0.7582；公開 USDT 歷史為 75.96 天、1,822 筆每小時資料、完整率 99.95%、最長缺口 3 小時，策略輸出 1,400 筆。
+- 1,000 USDT、2 天、等待上限 1 小時的正式比較中，最佳化策略與 FRR 估計淨利同為 4.652 USDT，穩健替代為 3.749 USDT，快速成交為 2.841 USDT；目前沒有證據顯示含預測策略優於 FRR。
+- 最終 DOCX 與 PDF 已輸出至 `deliverables/`；PDF 共 16 頁，已逐頁檢查圖表、表格、標題、頁碼與內容裁切，並完成必要章節、最新數字、空白頁與舊數字排除檢查。Word 匯出的 PDF 與逐頁 PNG 由 PyMuPDF 驗證；既有通用 DOCX renderer 因環境缺少 `pdf2image` 未採用。
 - 已完成剩餘工作區分類：沒有遺漏的程式或測試原始碼；自動模型輸出、`data/local_public/`、`data/metadata/`、私人資料、交付檔及逐頁預覽持續保持未暫存。
 - README 與 motion 測試影片文件已改為目前正式狀態；舊的 `insufficient_data`／「尚未開始正式報告」文字不再作為現況說明。
-- `docs/FINAL_REPORT_OUTLINE.md` 與 `docs/FINAL_REPORT_DRAFT_STATUS.md` 保留到最新正式資料報告更新階段處理；測試影片分支仍為可選項，不混入本次正式交付主線。
+- `docs/FINAL_REPORT_OUTLINE.md` 已依最終報告完成狀態更新；舊的未追蹤草稿狀態文件不納入正式交付，測試影片分支仍為可選項，不混入本次正式交付主線。
 - 已清理可由程式、測試與正式輸出證明完成的舊待辦：回測 CSV 已存在；模型評估與回測結果確定以可重建 CSV 保存，不再新增重複的 SQLite 結果表；motion 測試分支確定不併入正式交付。
 - README 已補上本機／GitHub 來源合併、五種模型、回測與決策支援產物、一鍵完整更新命令，以及離線唯讀 Dashboard 的查看方式。尚未完成的主線只保留遠端整合、最新正式數字報告更新與最終 PDF 逐頁校對。
 

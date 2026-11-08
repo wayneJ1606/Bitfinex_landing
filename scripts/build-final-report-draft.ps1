@@ -157,7 +157,7 @@ function New-StrategyChart([string]$Path, $Results) {
     }
     $noteFont=New-Object System.Drawing.Font($fontName,13,[System.Drawing.FontStyle]::Italic)
     $redBrush=New-Object System.Drawing.SolidBrush($red)
-    $g.DrawString("正式資料快照：2026-10-26。公開成交代理仍不等同本人實際成交。",$noteFont,$redBrush,250,645)
+    $g.DrawString("正式資料快照：2026-11-08。公開成交代理仍不等同本人實際成交。",$noteFont,$redBrush,250,645)
     Save-Canvas $bmp $g $Path
 }
 
@@ -172,10 +172,10 @@ function New-MaturityGraphic([string]$Path) {
     $g.FillRectangle((New-Object System.Drawing.SolidBrush($lightGray)),$left,$top,$width,$height)
     $g.FillRectangle((New-Object System.Drawing.SolidBrush($green)),$left,$top,[int]($width*$pct),$height)
     $g.DrawRectangle((New-Object System.Drawing.Pen($gray,2)),$left,$top,$width,$height)
-    Draw-CenteredText $g "目前 62.96 天" $bold $black ([System.Drawing.RectangleF]::new(110,205,360,45))
+    Draw-CenteredText $g "目前 75.96 天" $bold $black ([System.Drawing.RectangleF]::new(110,205,360,45))
     Draw-CenteredText $g "正式門檻 60 天" $bold $black ([System.Drawing.RectangleF]::new(965,205,330,45))
     $greenBrush=New-Object System.Drawing.SolidBrush($green)
-    Draw-CenteredText $g "已達正式門檻：1,512 筆每小時資料，完整率 100%，最長缺口 1 小時" $font $greenBrush ([System.Drawing.RectangleF]::new(120,275,1160,45))
+    Draw-CenteredText $g "已達正式門檻：1,822 筆每小時資料，完整率 99.95%，最長缺口 3 小時" $font $greenBrush ([System.Drawing.RectangleF]::new(120,275,1160,45))
     Save-Canvas $bmp $g $Path
 }
 
@@ -282,13 +282,13 @@ $p=Add-Paragraph "Bitfinex 放貸決策輔助系統" 28 $true 1 12; $p.Style=-63
 Add-Paragraph "專案成果與結案報告最終版" 18 $false 1 30 | Out-Null
 Add-Paragraph "公開市場資料收集  利率預測  放貸策略比較  決策 Dashboard" 12 $false 1 55 | Out-Null
 Add-Figure $flowPng "圖 1  系統由資料收集一路連接至模型與策略展示" 16.0
-Add-Paragraph "報告日期  2026 年 10 月 26 日" 11 $false 1 4 | Out-Null
+Add-Paragraph "報告日期  2026 年 11 月 9 日" 11 $false 1 4 | Out-Null
 Add-Paragraph "用途  專案作品驗收與成果說明" 10 $false 1 4 | Out-Null
 Page-Break
 
 Add-Heading "摘要" 1 | Out-Null
-Add-Paragraph "本專案已完成 Bitfinex 放貸市場公開資料的定時收集、原始資料保存、每小時特徵工程、下一時點利率預測模型、模型效能評估、實驗性 USDT 放貸策略比較，以及唯讀 Dashboard。系統的目的不是自動下單，而是把利率、成交可能性、等待時間、資金閒置與手續費放在同一個畫面中，協助使用者判斷不同掛單方案的取捨。" | Out-Null
-Add-Paragraph "基礎利率模型已能針對 fBTC、fETH、fUSD 與 fUST 完成訓練及推論。在目前驗證資料中，四個市場都由簡單的前一期基準取得最佳 R²，表示複雜模型尚未提供穩定增益。最佳化策略層已能輸出 1,400 筆候選結果；截至 2026 年 10 月 26 日，USDT 公開歷史達 62.96 天、完整率 100%，已超過 60 天正式門檻並完成 walk-forward 驗證。結果仍屬研究與決策輔助，不構成投資建議。" | Out-Null
+Add-Paragraph "本專案已完成 Bitfinex 放貸市場公開資料的定時收集、原始資料保存、每小時特徵工程、下一時點利率預測模型、模型效能評估、正式 USDT 放貸策略比較，以及唯讀 Dashboard。系統的目的不是自動下單，而是把利率、成交可能性、等待時間、資金閒置與手續費放在同一個畫面中，協助使用者判斷不同掛單方案的取捨。" | Out-Null
+Add-Paragraph "基礎利率模型已能針對 fBTC、fETH、fUSD 與 fUST 完成訓練及推論。在目前驗證資料中，四個市場都由簡單的前一期基準取得最佳 R²，表示複雜模型尚未提供穩定增益。最佳化策略層已能輸出 1,400 筆候選結果；截至 2026 年 11 月 8 日，USDT 公開歷史達 75.96 天、完整率 99.95%，已超過 60 天正式門檻並完成 walk-forward 驗證。結果仍屬研究與決策輔助，不構成投資建議。" | Out-Null
 Add-Heading "驗收項目對照" 2 | Out-Null
 Add-Table @("驗收要求","本專案對應成果","狀態") @(
     @("主題相符","以 Bitfinex Funding 資料建立利率預測及放貸決策輔助","完成"),
@@ -336,7 +336,7 @@ Add-Heading "每小時建模特徵" 2 | Out-Null
 Add-Paragraph "原始 Funding Book 依市場與時間聚合為每小時資料。主要特徵包括 hour、day_of_week、avg_rate、weighted_avg_rate、min_rate、max_rate、total_amount、avg_period、offer_count、demand_count、rate_spread、previous_weighted_avg_rate、rate_change 與 amount_change。預測目標為下一時間點的 weighted_avg_rate。" | Out-Null
 Add-Paragraph "有效特徵並不是原始 CSV 的每一行。只有在同一小時內具備必要欄位、可正確聚合，且能與下一期目標對齊的紀錄，才會進入模型訓練。" | Out-Null
 
-Page-Break
+Add-Paragraph " " 4 $false 0 0 | Out-Null
 Add-Heading "資料收集與保存" 2 | Out-Null
 Add-Bullets @(
     "GitHub Actions 設定為定時處理公開資料；跨平台鎖已提交至 master，並於 Ubuntu 遠端驗收成功（GitHub Actions run 39687079671）。",
@@ -349,6 +349,7 @@ Add-Paragraph "資料採每日分檔，避免單一 CSV 無限制增長。公開
 
 Add-Heading "模型訓練與推論" 2 | Out-Null
 Add-Paragraph "模型依時間順序以 80％ 訓練、20％ 驗證，避免把未來資料混入過去。評估模型包含平均值 Baseline、前一值 Baseline、線性迴歸、決策樹與 XGBoost。所有模型都接收相同的每小時特徵，預測下一時間點的加權平均利率。" | Out-Null
+Add-Paragraph " " 4 $false 0 0 | Out-Null
 Add-Heading "XGBoost 白話說明" 2 | Out-Null
 Add-Paragraph "XGBoost 可以想成一組輪流修正錯誤的小型決策樹。第一棵樹先做粗略預測，下一棵樹專門學習前一棵樹預測錯誤的地方，最後把多棵樹的結果加總。它能處理非線性與特徵交互作用，但資料太少時也可能只記住歷史，因此必須與簡單 Baseline 公平比較。" | Out-Null
 Page-Break
@@ -359,20 +360,20 @@ Add-Table @("功能","主要程式或模組","輸出") @(
     @("模型解讀與圖表","model_report、prediction_chart","Markdown 與預測圖"),
     @("最佳化策略分析","python -m bitfinex_lending.p0_strategy_pipeline","策略 CSV、JSON、報告與 Dashboard"),
     @("一鍵完整更新","scripts/run-final-refresh.ps1","模型、策略與 Dashboard"),
-    @("自動驗證","python -m pytest -q","374 passed、1 deselected")
+    @("自動驗證","python -m pytest -q","380 passed、1 deselected")
 ) @(3.7,7.8,5.0) | Out-Null
 
 Add-Heading "三 分析結果" 1 | Out-Null
 Add-Heading "模型效能評估" 2 | Out-Null
 Add-Paragraph "MAE 是平均絕對誤差，越小越好；RMSE 會更重視較大的誤差，越小越好；R² 表示模型解釋變動的程度，接近 1 較佳，低於 0 代表甚至不如用固定平均值預測。" | Out-Null
 Add-Table @("市場","有效資料","最佳模型","MAE","RMSE","R²") @(
-    @("fBTC","1,693","前一期基準","2.2501e-10","5.9266e-10","-0.1423"),
-    @("fETH","1,693","前一期基準","1.8876e-05","3.3860e-05","-0.0151"),
-    @("fUSD","1,693","前一期基準","4.7159e-06","1.0205e-05","0.7676"),
-    @("fUST","1,512","前一期基準","7.6615e-06","1.5461e-05","0.8938")
+    @("fBTC","2,256","前一期基準","1.4750e-10","5.1125e-10","0.9330"),
+    @("fETH","2,256","前一期基準","1.0598e-05","1.9417e-05","0.3869"),
+    @("fUSD","2,256","前一期基準","4.3895e-06","9.6733e-06","0.8186"),
+    @("fUST","1,820","前一期基準","4.9834e-06","1.3750e-05","0.7582")
 ) @(2.4,2.4,4.1,2.7,2.7,2.3) | Out-Null
 Add-Figure $r2Png "圖 3  複雜模型未必優於簡單的前一值 Baseline" 15.8
-Add-Paragraph "目前四個市場都由前一期基準取得最佳 R²。fUSD 與 fUST 分別達 0.7676 與 0.8938，顯示短期利率延續性明顯；fBTC 與 fETH 的最佳 R² 仍為負值，表示這兩個市場目前連簡單基準也無法穩定解釋驗證期變動。複雜模型尚未提供一致增益，後續仍須持續監控跨期表現。" | Out-Null
+Add-Paragraph "目前四個市場都由前一期基準取得最佳 R²。fBTC、fUSD 與 fUST 分別達 0.9330、0.8186 與 0.7582，短期利率延續性較明顯；fETH 為 0.3869，解釋力較弱但仍為正值。複雜模型尚未提供一致增益，後續仍須持續監控跨期表現。" | Out-Null
 
 $predCharts=@(
     @("data\modeling\prediction_fBTC.svg","圖 4  fBTC 驗證集實際值與預測值"),
@@ -391,11 +392,11 @@ Add-Heading "最佳化放貸策略比較" 2 | Out-Null
 Add-Paragraph "基礎模型回答下一時間點利率可能落在哪裡；最佳化策略層再回答應該掛多少利率、借出幾天，以及等待未成交是否會讓高利率失去優勢。候選本金為 1,000 至 10,000 USDT，每 1,000 USDT 可視為一個拆單單位，期限比較 2、5、10 與 30 天。收益計算已納入 Bitfinex 放貸收益 15％ 手續費。" | Out-Null
 Add-Figure $strategyPng "圖 8  最新 1,000 USDT 策略比較示例" 15.8
 Add-Table @("策略","利率概念","成交代理","淨利息","用途") @(
-    @("最佳化含預測","依模型與成交代理選擇預期淨收益最高者","71.43％","4.749 USDT","觀察模型輔助效果"),
-    @("最佳化未含預測","只依歷史市場條件最佳化","71.43％","4.749 USDT","比較預測增益"),
-    @("穩健替代","較重視成交穩定","92.86％","3.700 USDT","降低結果波動"),
-    @("快速成交","較低利率換取較高成交代理","99.67％","2.969 USDT","快速成交基準"),
-    @("FRR","Bitfinex 市場參考利率","71.43％","4.749 USDT","市場基準")
+    @("最佳化含預測","依模型與成交代理選擇預期淨收益最高者","67.44％","4.652 USDT","觀察模型輔助效果"),
+    @("最佳化未含預測","只依歷史市場條件最佳化","67.44％","4.652 USDT","比較預測增益"),
+    @("穩健替代","較重視成交穩定","90.44％","3.749 USDT","降低結果波動"),
+    @("快速成交","較低利率換取較高成交代理","99.34％","2.841 USDT","快速成交基準"),
+    @("FRR","Bitfinex 市場參考利率","67.44％","4.652 USDT","市場基準")
 ) @(3.1,5.2,2.7,2.7,3.4) | Out-Null
 Add-Paragraph "以上為本金 1,000 USDT、名目期間 2 天、等待上限 1 小時的正式歷史驗證結果。含預測、未含預測的最佳化結果與 FRR 相同，代表目前尚未證明模型帶來額外淨收益；資料門檻與 walk-forward 驗證雖已完成，結果仍不等於未來保證收益。" | Out-Null
 
@@ -416,11 +417,11 @@ Add-Paragraph "目前 Dashboard 為唯讀工具，不會讀取或顯示 API 金�
 
 Add-Heading "資料成熟度與可靠性" 2 | Out-Null
 Add-Figure $maturityPng "圖 9  USDT 公開資料已達正式門檻" 15.8
-Add-Paragraph "截至 2026 年 10 月 26 日，USDT 公開歷史達 62.96 天，共 1,512 筆每小時資料，完整率 100%，最長缺口 1 小時，並可產生 1,400 筆策略結果。資料門檻與 walk-forward 驗證均已完成，因此產品流程、資料欄位、計算及 Dashboard 可進入正式驗收；但策略仍須接受後續滾動監控。" | Out-Null
+Add-Paragraph "截至 2026 年 11 月 8 日，USDT 公開歷史達 75.96 天，共 1,822 筆每小時資料，完整率 99.95%，最長缺口 3 小時，並可產生 1,400 筆策略結果。資料門檻與 walk-forward 驗證均已完成，因此產品流程、資料欄位、計算及 Dashboard 可進入正式驗收；但策略仍須接受後續滾動監控。" | Out-Null
 Add-Table @("可靠性項目","目前狀態","正式完成條件") @(
-    @("公開市場連續性","62.96 天、完整率 100%、最長缺口 1 小時","已達 60 天門檻"),
-    @("基礎模型","2026-10-26 完成四市場五種模型更新","持續監控跨期表現"),
-    @("USDT 利率預測","fUST 正式輸出，最佳 R² 0.8938","已重新建模與驗證"),
+    @("公開市場連續性","75.96 天、完整率 99.95%、最長缺口 3 小時","已達 60 天門檻"),
+    @("基礎模型","2026-11-08 完成四市場五種模型更新","持續監控跨期表現"),
+    @("USDT 利率預測","fUST 正式輸出，最佳 R² 0.7582","已重新建模與驗證"),
     @("成交機率","目前使用公開市場代理","私人可比事件至少 30 筆後校正"),
     @("策略穩定性","已完成正式 walk-forward；未勝過 FRR","後續以滾動視窗持續監控")
 ) @(4.1,5.4,5.8) | Out-Null
@@ -433,7 +434,7 @@ Add-Bullets @(
     "特徵工程、五種模型訓練與推論、MAE／RMSE／R² 評估。",
     "基礎回測與決策報告、模型預測圖。",
     "USDT 最佳化策略比較管線、每日 10 點分析排程與唯讀 Dashboard。",
-    "374 項離線自動測試通過；另有 1 項真實 API 整合測試因預設離線而未執行。"
+    "380 項離線自動測試通過；另有 1 項真實 API 整合測試因預設離線而未執行。"
 )
 Add-Heading "目前限制" 2 | Out-Null
 Add-Bullets @(
@@ -452,7 +453,7 @@ Add-Bullets @(
     "以 90 天、180 天及滾動視窗持續更新模型與 walk-forward 驗證，觀察結果能否跨市場情境維持。",
     "持續累積私人唯讀成交事件，以本人實際成交與等待資料校正公開市場代理。",
     "定期比較前一期基準、線性模型、決策樹與 XGBoost，僅保留跨期表現穩定的模型。",
-    "把模型重建、最佳化策略與 Dashboard 串接成同一個可重複執行流程。",
+    "建立模型漂移與策略基準落後警示，當表現明顯惡化時提示重新檢查資料與參數。",
     "未來可增加異常告警、資料品質監控與多資產資金配置，但仍維持人工下單安全邊界。"
 )
 
@@ -470,9 +471,9 @@ Add-Table @("目的","指令或檔案") @(
 # Footer and page numbers
 foreach($section in $doc.Sections) {
     $footer=$section.Footers.Item(1).Range
-    $footer.Text="Bitfinex 放貸決策輔助系統  結案報告最終版    "
+    $footer.Text=""
     Set-RunFont $footer 8 $false 8421504
-    $footer.ParagraphFormat.Alignment=2
+    $footer.ParagraphFormat.Alignment=1
     $pageFieldRange=$footer.Paragraphs.Item(1).Range.Duplicate
     $pageFieldRange.End=$pageFieldRange.End-1
     $pageFieldRange.Collapse(0)

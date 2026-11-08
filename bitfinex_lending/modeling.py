@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import json
 from pathlib import Path
 from typing import Callable, Sequence
 
@@ -18,14 +19,20 @@ from .backtest_report import export_backtest_report
 from .decision_support import build_decision_support
 from .decision_support_csv import export_decision_support
 from .models import FundingBookRow, ModelingFeature, ModelingResult
-from .raw_csv import RawCsvError, load_raw_snapshots
+from .raw_csv import (
+    MergedRawSnapshots,
+    RawCsvError,
+    load_merged_raw_snapshots,
+    load_raw_snapshots,
+)
 
 
 @dataclass(frozen=True)
 class ModelingSettings:
-    raw_root: Path = Path("data/raw")
+    raw_root: Path = Path("data/local_public/raw")
     output_root: Path = Path("data/modeling")
     required_rows: int = 168
+    fallback_raw_root: Path | None = Path("data/raw")
 
 
 @dataclass(frozen=True)
@@ -43,6 +50,35 @@ class ModelingRunSummary:
     decision_support_csv_path: Path | None = None
     decision_support_markdown_path: Path | None = None
     backtest_report_path: Path | None = None
+    merge_status_path: Path | None = None
+
+
+def export_source_merge_status(
+    merged: MergedRawSnapshots, output_root: Path, run_at: str
+) -> Path:
+    output_root = Path(output_root)
+    output_root.mkdir(parents=True, exist_ok=True)
+    path = output_root / "source_merge_status.json"
+    temporary = path.with_suffix(".json.tmp")
+    payload = {
+        "schema_version": "raw-source-merge-v1",
+        "generated_at": run_at,
+        "strategy": "primary_market_hour_else_fallback",
+        "primary_snapshots": merged.primary_snapshots,
+        "fallback_snapshots": merged.fallback_snapshots,
+        "selected_primary_snapshots": merged.selected_primary_snapshots,
+        "selected_fallback_snapshots": merged.selected_fallback_snapshots,
+        "overlapping_hours": merged.overlapping_hours,
+        "discarded_same_source_snapshots": merged.discarded_same_source_snapshots,
+        "discarded_fallback_snapshots": merged.discarded_fallback_snapshots,
+        "selected_rows": len(merged.rows),
+    }
+    temporary.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    temporary.replace(path)
+    return path
 
 
 def run_modeling_pipeline(
@@ -50,6 +86,7 @@ def run_modeling_pipeline(
     output_root: Path,
     run_at: str,
     *,
+    fallback_raw_root: Path | None = None,
     required_rows: int = 168,
     loader: Callable[[Path], Sequence[FundingBookRow]] = load_raw_snapshots,
     calculator: Callable[[Sequence[FundingBookRow]], Sequence[ModelingFeature]] = calculate_features,
@@ -57,7 +94,13 @@ def run_modeling_pipeline(
     feature_exporter: Callable[[Sequence[ModelingFeature], Path], Path] = export_modeling_features,
     result_exporter: Callable[[ModelingResult, Path], tuple[Path, Path, Path]] = export_modeling_results,
 ) -> ModelingRunSummary:
-    rows = loader(Path(raw_root))
+    merge_status_path: Path | None = None
+    if fallback_raw_root is None:
+        rows = loader(Path(raw_root))
+    else:
+        merged = load_merged_raw_snapshots(Path(raw_root), Path(fallback_raw_root))
+        rows = merged.rows
+        merge_status_path = export_source_merge_status(merged, output_root, run_at)
     features = calculator(rows)
     result = evaluator(features, run_at, required_rows)
     feature_path = feature_exporter(features, Path(output_root))
@@ -86,6 +129,7 @@ def run_modeling_pipeline(
         decision_support_csv_path=decision_support_csv_path,
         decision_support_markdown_path=decision_support_markdown_path,
         backtest_report_path=backtest_report_path,
+        merge_status_path=merge_status_path,
     )
 
 
@@ -96,6 +140,7 @@ def main(settings: ModelingSettings | None = None) -> int:
             settings.raw_root,
             settings.output_root,
             datetime.now(timezone.utc).isoformat(),
+            fallback_raw_root=settings.fallback_raw_root,
             required_rows=settings.required_rows,
         )
     except (
@@ -129,6 +174,7 @@ def main(settings: ModelingSettings | None = None) -> int:
         *( (summary.decision_support_csv_path,) if summary.decision_support_csv_path is not None else () ),
         *( (summary.decision_support_markdown_path,) if summary.decision_support_markdown_path is not None else () ),
         *( (summary.backtest_report_path,) if summary.backtest_report_path is not None else () ),
+        *( (summary.merge_status_path,) if summary.merge_status_path is not None else () ),
     ):
         print(f"output={path}")
     return 0

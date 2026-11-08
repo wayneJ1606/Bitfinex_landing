@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+from dataclasses import dataclass
 from datetime import date, datetime, timezone
 import math
 from pathlib import Path
@@ -24,6 +25,18 @@ SUPPORTED_MARKETS = frozenset({"fUSD", "fUST", "fBTC", "fETH"})
 
 class RawCsvError(ValueError):
     pass
+
+
+@dataclass(frozen=True)
+class MergedRawSnapshots:
+    rows: tuple[FundingBookRow, ...]
+    primary_snapshots: int
+    fallback_snapshots: int
+    selected_primary_snapshots: int
+    selected_fallback_snapshots: int
+    overlapping_hours: int
+    discarded_same_source_snapshots: int
+    discarded_fallback_snapshots: int
 
 
 def load_raw_snapshots(root: Path) -> tuple[FundingBookRow, ...]:
@@ -84,6 +97,76 @@ def load_raw_snapshots(root: Path) -> tuple[FundingBookRow, ...]:
             ),
         )
     )
+
+
+def load_merged_raw_snapshots(
+    primary_root: Path, fallback_root: Path
+) -> MergedRawSnapshots:
+    """Select one intact snapshot per market-hour, preferring primary data."""
+    primary_rows = load_raw_snapshots(primary_root)
+    fallback_rows = load_raw_snapshots(fallback_root)
+    primary = _hourly_snapshots(primary_rows)
+    fallback = _hourly_snapshots(fallback_rows)
+    primary_hours = set(primary)
+    fallback_hours = set(fallback)
+    overlapping_hours = primary_hours.intersection(fallback_hours)
+
+    selected: list[tuple[datetime, tuple[FundingBookRow, ...]]] = []
+    for hour_key, snapshots in primary.items():
+        selected.append(_latest_snapshot(snapshots))
+    for hour_key, snapshots in fallback.items():
+        if hour_key not in primary:
+            selected.append(_latest_snapshot(snapshots))
+
+    rows = tuple(
+        row
+        for _, snapshot_rows in sorted(
+            selected,
+            key=lambda item: (item[1][0].market, item[0], item[1][0].run_id),
+        )
+        for row in snapshot_rows
+    )
+    primary_snapshot_count = sum(len(items) for items in primary.values())
+    fallback_snapshot_count = sum(len(items) for items in fallback.values())
+    discarded_same_source = sum(
+        max(0, len(items) - 1)
+        for hourly in (primary, fallback)
+        for items in hourly.values()
+    )
+    discarded_fallback = sum(len(fallback[key]) for key in overlapping_hours)
+    return MergedRawSnapshots(
+        rows=rows,
+        primary_snapshots=primary_snapshot_count,
+        fallback_snapshots=fallback_snapshot_count,
+        selected_primary_snapshots=len(primary),
+        selected_fallback_snapshots=len(fallback_hours - primary_hours),
+        overlapping_hours=len(overlapping_hours),
+        discarded_same_source_snapshots=discarded_same_source,
+        discarded_fallback_snapshots=discarded_fallback,
+    )
+
+
+def _hourly_snapshots(
+    rows: tuple[FundingBookRow, ...],
+) -> dict[tuple[str, datetime], list[tuple[datetime, tuple[FundingBookRow, ...]]]]:
+    snapshots: dict[tuple[str, str, str], list[FundingBookRow]] = {}
+    for row in rows:
+        snapshots.setdefault((row.market, row.fetched_at, row.run_id), []).append(row)
+
+    hourly: dict[
+        tuple[str, datetime], list[tuple[datetime, tuple[FundingBookRow, ...]]]
+    ] = {}
+    for (market, fetched_at, _), snapshot_rows in snapshots.items():
+        timestamp = datetime.fromisoformat(fetched_at).astimezone(timezone.utc)
+        hour = timestamp.replace(minute=0, second=0, microsecond=0)
+        hourly.setdefault((market, hour), []).append((timestamp, tuple(snapshot_rows)))
+    return hourly
+
+
+def _latest_snapshot(
+    snapshots: list[tuple[datetime, tuple[FundingBookRow, ...]]],
+) -> tuple[datetime, tuple[FundingBookRow, ...]]:
+    return max(snapshots, key=lambda item: (item[0], item[1][0].run_id))
 
 
 def _root_error(error: OSError) -> RawCsvError:

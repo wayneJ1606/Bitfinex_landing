@@ -117,13 +117,23 @@ def _run(cwd: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
     )
 
 
-def _atomic_status(project_root: Path, summary: SyncSummary, error_type: str | None = None) -> None:
+def _atomic_status(
+    project_root: Path,
+    summary: SyncSummary,
+    error_type: str | None = None,
+    failed_stage: str | None = None,
+    return_code: int | None = None,
+) -> None:
     path = project_root / "data/metadata/public_git_sync_status.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(".json.tmp")
     payload = asdict(summary)
     if error_type is not None:
         payload["error_type"] = error_type
+    if failed_stage is not None:
+        payload["failed_stage"] = failed_stage
+    if return_code is not None:
+        payload["return_code"] = return_code
     temporary.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -154,17 +164,23 @@ def synchronize(
     max_attempts: int = 3,
 ) -> SyncSummary:
     project_root = Path(project_root).resolve()
-    files = collect_public_files(project_root)
-    total_bytes = sum(path.stat().st_size for path in files)
-    if not push:
-        return SyncSummary("preview", len(files), total_bytes, None, 0)
+    files: tuple[Path, ...] = ()
+    total_bytes = 0
+    failed_stage = "collect_public_files"
+    push_attempts = 0
     try:
+        files = collect_public_files(project_root)
+        total_bytes = sum(path.stat().st_size for path in files)
+        if not push:
+            return SyncSummary("preview", len(files), total_bytes, None, 0)
+        failed_stage = "resolve_remote"
         if remote_url is None:
             remote_url = _run(project_root, "remote", "get-url", "origin").stdout.strip()
         if not remote_url:
             raise SyncError("origin remote is unavailable")
         with tempfile.TemporaryDirectory(prefix="bitfinex-public-sync-") as temporary:
             checkout = Path(temporary) / "repository"
+            failed_stage = "clone"
             _run(
                 Path(temporary),
                 "clone",
@@ -174,6 +190,7 @@ def synchronize(
                 remote_url,
                 str(checkout),
             )
+            failed_stage = "prepare_files"
             for source in files:
                 relative = source.relative_to(project_root)
                 destination = checkout / relative
@@ -191,6 +208,7 @@ def synchronize(
                 + "\n",
                 encoding="utf-8",
             )
+            failed_stage = "configure_identity"
             _run(checkout, "config", "user.name", "Bitfinex local public sync")
             _run(checkout, "config", "user.email", "local-public-sync@users.noreply.github.com")
             stage_paths = tuple(
@@ -198,7 +216,9 @@ def synchronize(
                 for prefix in APPROVED_PREFIXES
                 if (checkout / prefix).exists()
             )
+            failed_stage = "stage_files"
             _run(checkout, "add", "--", *stage_paths)
+            failed_stage = "check_changes"
             unchanged = subprocess.run(
                 ["git", "diff", "--cached", "--quiet"],
                 cwd=checkout,
@@ -209,20 +229,35 @@ def synchronize(
                 summary = SyncSummary("no_changes", len(files), total_bytes, None, 0)
                 _atomic_status(project_root, summary)
                 return summary
+            failed_stage = "commit"
             _run(checkout, "commit", "-m", "data: sync local public collection [skip ci]")
 
             def push_once() -> None:
+                nonlocal failed_stage, push_attempts
+                push_attempts += 1
+                failed_stage = "pull_rebase"
                 _run(checkout, "pull", "--rebase", "origin", branch)
+                failed_stage = "push"
                 _run(checkout, "push", "origin", f"HEAD:{branch}")
 
             attempts = push_with_retries(push_once, max_attempts=max_attempts)
+            failed_stage = "read_commit"
             commit_sha = _run(checkout, "rev-parse", "HEAD").stdout.strip()
             summary = SyncSummary("success", len(files), total_bytes, commit_sha, attempts)
             _atomic_status(project_root, summary)
             return summary
     except (OSError, subprocess.SubprocessError, SyncError) as error:
-        summary = SyncSummary("failed", len(files), total_bytes, None, max_attempts)
-        _atomic_status(project_root, summary, type(error).__name__)
+        summary = SyncSummary("failed", len(files), total_bytes, None, push_attempts)
+        return_code = (
+            error.returncode if isinstance(error, subprocess.CalledProcessError) else None
+        )
+        _atomic_status(
+            project_root,
+            summary,
+            type(error).__name__,
+            failed_stage,
+            return_code,
+        )
         raise
 
 

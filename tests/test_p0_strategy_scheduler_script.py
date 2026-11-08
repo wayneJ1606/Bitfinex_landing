@@ -15,8 +15,9 @@ def test_p0_strategy_scheduler_contract_is_daily_preview_first_and_hidden() -> N
 
     for token in (
         "BitfinexP0StrategyAnalysis",
-        "-m bitfinex_lending.p0_strategy_pipeline",
-        "pythonw.exe",
+        "run-final-refresh.ps1",
+        "powershell.exe",
+        "-WindowStyle Hidden",
         "New-ScheduledTaskTrigger -Daily",
         '10:00',
         "StartWhenAvailable",
@@ -57,7 +58,12 @@ def test_p0_strategy_scheduler_preview_reports_contract_without_registration() -
     json_text, registration = completed.stdout.rsplit("registration=", maxsplit=1)
     contract = json.loads(json_text)
     assert contract["task_name"] == "BitfinexP0StrategyAnalysis"
-    assert contract["arguments"] == "-m bitfinex_lending.p0_strategy_pipeline"
+    assert Path(contract["executable"]).name.lower() == "powershell.exe"
+    assert "run-final-refresh.ps1" in contract["arguments"]
+    assert "-WindowStyle Hidden" in contract["arguments"]
+    assert "-ProjectRoot" in contract["arguments"]
+    assert "-PythonPath" in contract["arguments"]
+    assert contract["python"] == str(Path(sys.executable).resolve())
     assert contract["local_time"] == "10:00"
     assert contract["multiple_instances"] == "IgnoreNew"
     assert contract["start_when_available"] is True

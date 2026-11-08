@@ -5,7 +5,12 @@ from pathlib import Path
 
 import pytest
 
-from bitfinex_lending.raw_csv import RAW_FIELDS, RawCsvError, load_raw_snapshots
+from bitfinex_lending.raw_csv import (
+    RAW_FIELDS,
+    RawCsvError,
+    load_merged_raw_snapshots,
+    load_raw_snapshots,
+)
 
 
 def write_raw(path: Path, rows: list[list[str]]) -> None:
@@ -78,6 +83,54 @@ def test_loads_multiple_days_in_utc_order_and_deduplicates_exact_rows(
     assert rows[0].rate == 0.0002
     assert rows[0].period == 2
     assert rows[0].count == 1
+
+
+def test_merged_loader_prefers_latest_primary_snapshot_and_fills_missing_hours(
+    tmp_path: Path,
+) -> None:
+    primary = tmp_path / "local"
+    fallback = tmp_path / "github"
+    write_raw(
+        primary / "2026/07/21/fUSD.csv",
+        [
+            raw_row(run_id="local-old", fetched_at="2026-07-21T10:05:00+00:00"),
+            raw_row(run_id="local-new", fetched_at="2026-07-21T10:55:00+00:00"),
+        ],
+    )
+    write_raw(
+        fallback / "2026/07/21/fUSD.csv",
+        [
+            raw_row(run_id="github-conflict", fetched_at="2026-07-21T10:40:00+00:00"),
+            raw_row(run_id="github-fill", fetched_at="2026-07-21T11:40:00+00:00"),
+        ],
+    )
+
+    merged = load_merged_raw_snapshots(primary, fallback)
+
+    assert [row.run_id for row in merged.rows] == ["local-new", "github-fill"]
+    assert merged.primary_snapshots == 2
+    assert merged.fallback_snapshots == 2
+    assert merged.selected_primary_snapshots == 1
+    assert merged.selected_fallback_snapshots == 1
+    assert merged.overlapping_hours == 1
+    assert merged.discarded_same_source_snapshots == 1
+    assert merged.discarded_fallback_snapshots == 1
+
+
+def test_merged_loader_uses_fallback_when_primary_root_is_missing(
+    tmp_path: Path,
+) -> None:
+    fallback = tmp_path / "github"
+    write_raw(
+        fallback / "2026/07/21/fUST.csv",
+        [raw_row(run_id="github-only", market="fUST")],
+    )
+
+    merged = load_merged_raw_snapshots(tmp_path / "missing", fallback)
+
+    assert [row.run_id for row in merged.rows] == ["github-only"]
+    assert merged.selected_primary_snapshots == 0
+    assert merged.selected_fallback_snapshots == 1
 
 
 def test_writes_and_loads_fust_from_its_daily_market_path(tmp_path: Path) -> None:

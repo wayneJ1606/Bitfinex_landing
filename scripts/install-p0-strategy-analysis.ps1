@@ -18,23 +18,21 @@ if ([string]::IsNullOrWhiteSpace($ProjectRoot)) {
     $ProjectRoot = Split-Path -Parent $PSScriptRoot
 }
 $resolvedRoot = (Resolve-Path -LiteralPath $ProjectRoot).Path
-$pipelinePath = Join-Path $resolvedRoot "bitfinex_lending\p0_strategy_pipeline.py"
-if (-not (Test-Path -LiteralPath $pipelinePath)) {
-    throw "ProjectRoot does not contain bitfinex_lending\p0_strategy_pipeline.py"
+$refreshScript = Join-Path $resolvedRoot "scripts\run-final-refresh.ps1"
+if (-not (Test-Path -LiteralPath $refreshScript)) {
+    throw "ProjectRoot does not contain scripts\run-final-refresh.ps1"
 }
 if ([string]::IsNullOrWhiteSpace($PythonPath)) {
     $PythonPath = (Get-Command python -ErrorAction Stop).Source
 }
 $resolvedPython = (Resolve-Path -LiteralPath $PythonPath).Path
-$pythonwPath = Join-Path (Split-Path -Parent $resolvedPython) "pythonw.exe"
-if (Test-Path -LiteralPath $pythonwPath) {
-    $resolvedPython = $pythonwPath
-}
-$arguments = "-m bitfinex_lending.p0_strategy_pipeline"
+$resolvedPowerShell = (Get-Command powershell.exe -ErrorAction Stop).Source
+$arguments = "-NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$refreshScript`" -ProjectRoot `"$resolvedRoot`" -PythonPath `"$resolvedPython`""
 
 $contract = [ordered]@{
     task_name = $TaskName
     project_root = $resolvedRoot
+    executable = $resolvedPowerShell
     python = $resolvedPython
     arguments = $arguments
     working_directory = $resolvedRoot
@@ -53,7 +51,7 @@ if (-not $Enable) {
     exit 0
 }
 
-$action = New-ScheduledTaskAction -Execute $resolvedPython -Argument $arguments -WorkingDirectory $resolvedRoot
+$action = New-ScheduledTaskAction -Execute $resolvedPowerShell -Argument $arguments -WorkingDirectory $resolvedRoot
 $trigger = New-ScheduledTaskTrigger -Daily -At $LocalTime
 $principal = New-ScheduledTaskPrincipal `
     -UserId "$env:USERDOMAIN\$env:USERNAME" `
@@ -67,7 +65,7 @@ $settings = New-ScheduledTaskSettingsSet `
     -ExecutionTimeLimit (New-TimeSpan -Minutes 30)
 
 # Register only with explicit -Enable.
-if ($PSCmdlet.ShouldProcess($TaskName, "Register and enable daily P0 strategy analysis")) {
+if ($PSCmdlet.ShouldProcess($TaskName, "Register and enable daily model, strategy, and dashboard refresh")) {
     Register-ScheduledTask `
         -TaskName $TaskName `
         -Action $action `

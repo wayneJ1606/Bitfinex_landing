@@ -1,5 +1,7 @@
 # Bitfinex System Flow Motion Graphic Implementation Plan
 
+> Status update (2026-11-09): This plan produced a test-only closing presentation video on `feature/bitfinex-system-flow-motion`. The verified MP4 is a technical and visual proof of concept, not the formal closing report, formal presentation, or final submission video. A separate formal report and presentation now exist; this motion branch remains optional and has not been merged into the delivery path.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build a verified 25-second, 1920×1080 HyperFrames motion graphic that explains the Bitfinex lending system data flow without inventing model results.

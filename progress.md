@@ -1,5 +1,11 @@
 # Bitfinex 放貸市場決策輔助系統進度紀錄
 
+## 2026-11-09 結案前依序整理
+
+- 已完成剩餘工作區分類：沒有遺漏的程式或測試原始碼；自動模型輸出、`data/local_public/`、`data/metadata/`、私人資料、交付檔及逐頁預覽持續保持未暫存。
+- README 與 motion 測試影片文件已改為目前正式狀態；舊的 `insufficient_data`／「尚未開始正式報告」文字不再作為現況說明。
+- `docs/FINAL_REPORT_OUTLINE.md` 與 `docs/FINAL_REPORT_DRAFT_STATUS.md` 保留到最新正式資料報告更新階段處理；測試影片分支仍為可選項，不混入本次正式交付主線。
+
 ## 2026-10-26 暫停點與下次續作入口
 
 - 本次已完成每日「模型 → 最佳化策略 → Dashboard」完整更新排程、公開 GitHub 同步失敗診斷，以及本機優先／GitHub 補缺的每小時模型層合併規則。

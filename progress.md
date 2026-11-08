@@ -2,7 +2,7 @@
 
 ## 2026-11-09 結案前依序整理
 
-- 已建立最新遠端整合候選 `codex/remote-master-reconciliation-20261109`：merge commit `2ddc21f6f593ef74c33d5a4f3c29f2698b45f024` 同時包含遠端 `dbc914e` 與本機 `b6cd3e4`，遠端重新抓取後未再前進；隱私測試 2 項通過，完整測試為 `380 passed, 1 deselected`。候選目前只存在本機，未推送也未改動遠端 `master`。
+- 已建立最新遠端整合候選 `codex/remote-master-reconciliation-20261109`：先以 merge commit `2ddc21f6` 整合遠端 `dbc914e` 與本機 checkpoints，再納入報告 commit `ab04b04`；最後重新抓取時發現遠端新增公開資料 commit `a0ecc45`，也已合併並重跑驗證。候選目前領先遠端 17 個 commits、落後 0，隱私測試 2 項通過，完整測試為 `380 passed, 1 deselected`；仍只存在本機，未推送也未改動遠端 `master`。
 - 已以 2026-11-08 正式資料更新結案內容：四市場皆由 `baseline_previous` 最佳，fUST 最佳 R² 為 0.7582；公開 USDT 歷史為 75.96 天、1,822 筆每小時資料、完整率 99.95%、最長缺口 3 小時，策略輸出 1,400 筆。
 - 1,000 USDT、2 天、等待上限 1 小時的正式比較中，最佳化策略與 FRR 估計淨利同為 4.652 USDT，穩健替代為 3.749 USDT，快速成交為 2.841 USDT；目前沒有證據顯示含預測策略優於 FRR。
 - 最終 DOCX 與 PDF 已輸出至 `deliverables/`；PDF 共 16 頁，已逐頁檢查圖表、表格、標題、頁碼與內容裁切，並完成必要章節、最新數字、空白頁與舊數字排除檢查。Word 匯出的 PDF 與逐頁 PNG 由 PyMuPDF 驗證；既有通用 DOCX renderer 因環境缺少 `pdf2image` 未採用。

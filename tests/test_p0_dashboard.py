@@ -76,6 +76,9 @@ def test_dashboard_contains_only_approved_controls_and_read_only_copy(tmp_path: 
     assert 'id="capital"' in html
     assert 'value="1000"' in html and 'value="10000"' in html
     assert 'id="asset"' in html
+    assert '<option value="USDT">USDT</option>' in html
+    assert '<option value="BTC">BTC</option>' not in html
+    assert '<option value="ETH">ETH</option>' not in html
     assert set(re.findall(r'data-period="(\d+)"', html)) == {"2", "5", "10", "30"}
     assert set(re.findall(r'data-wait="(\d+)"', html)) == {"1", "3", "6", "12", "24"}
     assert "本工具不會下單" in html

@@ -93,7 +93,7 @@ def _html(payload: Mapping[str, object]) -> str:
 
   <section class="panel controls" aria-label="策略篩選條件">
     <div><label for="capital">本金</label><select id="capital">{capital_options}</select></div>
-    <div><label for="asset">資產</label><select id="asset"><option value="USDT">USDT</option><option value="BTC">BTC</option><option value="ETH">ETH</option></select></div>
+    <div><label for="asset">資產</label><select id="asset"><option value="USDT">USDT</option></select></div>
     <div><span class="label">借出期限</span><div id="periods" class="choices">{period_buttons}</div></div>
     <div><span class="label">最長等待</span><div id="waits" class="choices">{wait_buttons}</div></div>
   </section>

@@ -1,5 +1,5 @@
 market,status,feature_rows,valid_rows,required_rows,message
-fBTC,trained,983,981,168,"evaluated baseline_mean, baseline_previous, linear_regression, decision_tree, xgboost"
-fETH,trained,983,981,168,"evaluated baseline_mean, baseline_previous, linear_regression, decision_tree, xgboost"
-fUSD,trained,983,981,168,"evaluated baseline_mean, baseline_previous, linear_regression, decision_tree, xgboost"
-fUST,trained,449,447,168,"evaluated baseline_mean, baseline_previous, linear_regression, decision_tree, xgboost"
+fBTC,trained,986,984,168,"evaluated baseline_mean, baseline_previous, linear_regression, decision_tree, xgboost"
+fETH,trained,986,984,168,"evaluated baseline_mean, baseline_previous, linear_regression, decision_tree, xgboost"
+fUSD,trained,986,984,168,"evaluated baseline_mean, baseline_previous, linear_regression, decision_tree, xgboost"
+fUST,trained,452,450,168,"evaluated baseline_mean, baseline_previous, linear_regression, decision_tree, xgboost"
